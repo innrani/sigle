@@ -2,7 +2,7 @@ const { ipcMain } = require('electron');
 const { initializeDatabase } = require('./database');
 
 function setupDatabaseHandlers() {
-    const db = initializeDatabase(); 
+    const db = initializeDatabase();
 
     // ------------------------------------
     // Handlers para Clientes
@@ -12,11 +12,22 @@ function setupDatabaseHandlers() {
     ipcMain.handle('list-clients', async () => {
         try {
             // Filtra apenas clientes ativos (ativo = 1)
-            const query = 'SELECT * FROM clientes WHERE ativo = 1 ORDER BY name'; 
+            const query = 'SELECT * FROM clientes WHERE ativo = 1 ORDER BY name';
             return db.prepare(query).all();
         } catch (error) {
             console.error("Erro ao listar clientes:", error);
             throw new Error("Falha ao buscar clientes no banco de dados.");
+        }
+    });
+
+    ipcMain.handle('list-all-clients', async () => {
+        try {
+            // Não filtra por ativo
+            const query = 'SELECT * FROM clientes ORDER BY name';
+            return db.prepare(query).all();
+        } catch (error) {
+            console.error("Erro ao listar todos os clientes:", error);
+            throw new Error("Falha ao buscar todos os clientes no banco de dados.");
         }
     });
 
@@ -27,15 +38,15 @@ function setupDatabaseHandlers() {
                 INSERT INTO clientes (name, email, phone, cpf, address, city, state, zipCode, observations, ativo)
                 VALUES (@name, @email, @phone, @cpf, @address, @city, @state, @zipCode, @observations, 1)
             `;
-            const result = db.prepare(query).run(client); 
-            
+            const result = db.prepare(query).run(client);
+
             const newClient = db.prepare('SELECT * FROM clientes WHERE id = ?').get(result.lastInsertRowid);
             return newClient;
 
         } catch (error) {
             console.error("Erro ao adicionar cliente:", error);
             if (error.code === 'SQLITE_CONSTRAINT') {
-                 throw new Error("Violação de restrição. Verifique se o CPF já está cadastrado.");
+                throw new Error("Violação de restrição. Verifique se o CPF já está cadastrado.");
             }
             throw new Error("Falha ao salvar cliente no banco de dados.");
         }
@@ -67,19 +78,19 @@ function setupDatabaseHandlers() {
         } catch (error) {
             console.error("Erro ao atualizar cliente:", error);
             if (error.code === 'SQLITE_CONSTRAINT') {
-                 throw new Error("Violação de restrição. Verifique se o CPF já está cadastrado.");
+                throw new Error("Violação de restrição. Verifique se o CPF já está cadastrado.");
             }
             throw new Error("Falha ao atualizar cliente no banco de dados.");
         }
     });
 
-// Deletar cliente (SOFT DELETE) - SOLUÇÃO DEFINITIVA CONTRA ERRO 'const'
+    // Deletar cliente (SOFT DELETE) - SOLUÇÃO DEFINITIVA CONTRA ERRO 'const'
     ipcMain.handle('delete-client', async (event, id) => {
         try {
             // 1. Verifica as Ordens de Serviço (OS) do cliente
             const checkServicesQuery = 'SELECT COUNT(numeroOS) AS serviceCount FROM servico WHERE clientId = ?';
-            const { serviceCount } = db.prepare(checkServicesQuery).get(id); 
-            
+            const { serviceCount } = db.prepare(checkServicesQuery).get(id);
+
             // Variável booleana para simplificar a lógica
             const isSoftDelete = !(serviceCount > 0);
 
@@ -91,7 +102,7 @@ function setupDatabaseHandlers() {
             const resultMessage = isSoftDelete
                 ? { type: 'soft', message: `Cliente possui ${serviceCount} OS(s) e foi marcado como inativo. Seus dados foram preservados para histórico.` }
                 : { type: 'hard', message: 'Cliente excluído permanentemente.' };
-            
+
             // 3. Executa a query
             db.prepare(finalQuery).run(id);
 
@@ -100,6 +111,18 @@ function setupDatabaseHandlers() {
         } catch (error) {
             console.error("Erro ao deletar/inativar cliente:", error);
             throw new Error("Falha ao processar exclusão do cliente no banco de dados.");
+        }
+    });
+
+    // Reativar cliente (setar ativo = 1 novamente)
+    ipcMain.handle('reactivate-client', async (event, id) => {
+        try {
+            const query = 'UPDATE clientes SET ativo = 1, updatedAt = CURRENT_TIMESTAMP WHERE id = ?';
+            db.prepare(query).run(id);
+            return { success: true, message: 'Cliente reativado com sucesso.' };
+        } catch (error) {
+            console.error("Erro ao reativar cliente:", error);
+            throw new Error("Falha ao reativar cliente no banco de dados.");
         }
     });
 
