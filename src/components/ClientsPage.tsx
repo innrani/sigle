@@ -6,6 +6,16 @@ import { toast } from "sonner"; // Usar o toast para feedback
 import type { Client } from "../types/index"; // <--- Ajuste o caminho
 import { Button } from "./ui/button";
 import { DatabaseService } from "../services/database"; // <--- Importa o serviço de DB
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "./ui/alert-dialog";
 
 interface ClientsPageProps {
   onBack: () => void;
@@ -21,23 +31,31 @@ interface ClientsPageProps {
 export function ClientsPage({ onBack, clients, onOpenAddModal, onOpenEditModal, onClientDeleted }: ClientsPageProps) {
   const [searchQuery, setSearchQuery] = useState("");
 
-  // FUNÇÃO DE EXCLUSÃO (DELETE)
-  const handleDeleteClient = async (clientId: string) => {
-    if (!window.confirm("Tem certeza que deseja excluir este cliente? Esta ação é irreversível.")) return;
+  const [clientToDeleteId, setClientToDeleteId] = useState<string | null>(null);
 
+  // SUBSTITUA a função handleDeleteClient
+  const handleDeleteClient = async (clientId: string) => {
     try {
       // 1. CHAMA O BACKEND PARA DELETAR
-      await DatabaseService.deleteClient(clientId);
-      
-      // 2. Notifica o App.tsx para atualizar o estado da lista
-      onClientDeleted(clientId); 
+      const result = await DatabaseService.deleteClient(clientId);
 
-      toast.success("Cliente excluído permanentemente!");
+      // 2. Notifica o App.tsx para remover o cliente do estado local
+      onClientDeleted(clientId);
+
+      // 3. Exibe a mensagem de sucesso com a resposta do Soft Delete
+      toast.success(result.message);
+
     } catch (error) {
-      console.error("Erro ao deletar cliente via IPC:", error);
-      toast.error("Falha ao excluir cliente. Tente novamente.");
+      console.error("Erro ao deletar cliente:", error);
+      const errorMessage = error instanceof Error ? error.message : "Erro desconhecido ao deletar cliente.";
+      toast.error(errorMessage);
+    } finally {
+      // ⚠️ CORREÇÃO DO TRAVAMENTO: Zera o estado para fechar o modal e liberar a tela
+      setClientToDeleteId(null);
     }
   };
+
+
 
   // Filter clients based on search
   const filteredClients = clients.filter((client) => {
@@ -86,14 +104,14 @@ export function ClientsPage({ onBack, clients, onOpenAddModal, onOpenEditModal, 
               onChange={(e) => setSearchQuery(e.target.value)}
             />
           </div>
-            <div className="flex justify-center">
-              <Button 
-                onClick={onOpenAddModal}
-                className="bg-[#8b7355] hover:bg-[#7a6345] text-white rounded-full px-6 py-2 flex items-center gap-2"
-              >
-                <Plus className="w-4 h-4" />
-                Novo Cliente
-              </Button>
+          <div className="flex justify-center">
+            <Button
+              onClick={onOpenAddModal}
+              className="bg-[#8b7355] hover:bg-[#7a6345] text-white rounded-full px-6 py-2 flex items-center gap-2"
+            >
+              <Plus className="w-4 h-4" />
+              Novo Cliente
+            </Button>
           </div>
         </div>
       </div>
@@ -110,7 +128,7 @@ export function ClientsPage({ onBack, clients, onOpenAddModal, onOpenEditModal, 
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 max-w-7xl mx-auto">
             {filteredClients.map((client) => (
-              <div 
+              <div
                 key={client.id}
                 className="bg-white border border-gray-300 rounded-lg p-5 shadow-md hover:shadow-lg transition-shadow"
               >
@@ -129,7 +147,7 @@ export function ClientsPage({ onBack, clients, onOpenAddModal, onOpenEditModal, 
                       <Pencil className="w-4 h-4 text-gray-600" />
                     </button>
                     <button
-                      onClick={() => handleDeleteClient(client.id)}
+                      onClick={() => setClientToDeleteId(client.id)}
                       className="p-1 hover:bg-gray-100 rounded-full transition-colors"
                       title="Excluir cliente"
                     >
@@ -166,6 +184,28 @@ export function ClientsPage({ onBack, clients, onOpenAddModal, onOpenEditModal, 
                 </div>
               </div>
             ))}
+
+            {/* ⚠️ MODAL DE CONFIRMAÇÃO DE EXCLUSÃO (AlertDialog) ⚠️ */}
+            <AlertDialog open={!!clientToDeleteId} onOpenChange={(open: boolean) => !open && setClientToDeleteId(null)}>
+              <AlertDialogContent>
+                <AlertDialogHeader>
+                  <AlertDialogTitle>Confirmação de Exclusão</AlertDialogTitle>
+                  <AlertDialogDescription>
+                    Você está prestes a deletar um cliente. Se este cliente tiver ordens de serviço (OS) registradas, ele será apenas **inativado** (Exclusão Lógica) para preservar o histórico. Caso contrário, será excluído permanentemente.
+                  </AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter>
+                  <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                  <AlertDialogAction
+                    // Chama a exclusão se houver um ID no estado
+                    onClick={() => clientToDeleteId && handleDeleteClient(clientToDeleteId)}
+                    className="bg-red-600 hover:bg-red-700"
+                  >
+                    Confirmar Exclusão
+                  </AlertDialogAction>
+                </AlertDialogFooter>
+              </AlertDialogContent>
+            </AlertDialog>
           </div>
         )}
       </div>
