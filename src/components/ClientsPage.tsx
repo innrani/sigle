@@ -180,7 +180,7 @@ export function ClientsPage({ onBack, clients, onOpenAddModal, onOpenEditModal, 
                 <div className="flex items-start justify-between mb-4">
                   <h2 className={`text-lg font-semibold ${client.ativo ? 'text-gray-800' : 'text-red-500'}`}>
                     {client.name}
-                    {!client.ativo && <span className="text-sm font-normal ml-2">(Inativo)</span>}
+                    {!client.ativo && <span className="text-sm font-normal ml-3">(Inativo)</span>}
                   </h2>
                   <div className="flex gap-2">
   {/* Botão editar (sempre visível) */}
