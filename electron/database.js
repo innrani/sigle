@@ -23,20 +23,95 @@ function initializeDatabase() {
     // Cria a tabela de clientes se não existir
     // Adicionei a coluna 'ativo' (BOOLEAN/INTEGER) conforme seu frontend espera.
     const createTable = `
-        CREATE TABLE IF NOT EXISTS clients (
+        CREATE TABLE IF NOT EXISTS clientes (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             name TEXT NOT NULL,
             email TEXT,
             phone TEXT NOT NULL,
+            cpf TEXT UNIQUE NOT NULL,
             address TEXT,
             city TEXT,
             state TEXT,
             zipCode TEXT,
             observations TEXT,
-            ativo INTEGER DEFAULT 1, -- 1 para true, 0 para false
+            ativo INTEGER DEFAULT 1, 
             createdAt DATETIME DEFAULT CURRENT_TIMESTAMP,
             updatedAt DATETIME DEFAULT CURRENT_TIMESTAMP
-        )
+        );
+
+        CREATE TABLE IF NOT EXISTS tipoServico (
+            idTipoServico INTEGER PRIMARY KEY AUTOINCREMENT,
+            tipoServico TEXT NOT NULL,
+            ativo INTEGER DEFAULT 1,
+            createdAt DATETIME DEFAULT CURRENT_TIMESTAMP,
+            updatedAt DATETIME DEFAULT CURRENT_TIMESTAMP
+        );
+
+        CREATE TABLE IF NOT EXISTS formaPagamento (
+            idFormaPagamento INTEGER PRIMARY KEY AUTOINCREMENT,
+            formaPagamento TEXT NOT NULL,
+            ativo INTEGER DEFAULT 1,
+            createdAt DATETIME DEFAULT CURRENT_TIMESTAMP,
+            updatedAt DATETIME DEFAULT CURRENT_TIMESTAMP
+        );
+
+        CREATE TABLE IF NOT EXISTS equipamento (
+            numeroSerie TEXT PRIMARY KEY,
+            tipoAparelho TEXT NOT NULL,
+            marca TEXT,
+            modelo TEXT,
+            corAparelho TEXT,
+            acessorios TEXT,
+            problemaRelatado TEXT,
+            ativo INTEGER DEFAULT 1,
+            createdAt DATETIME DEFAULT CURRENT_TIMESTAMP,
+            updatedAt DATETIME DEFAULT CURRENT_TIMESTAMP
+        );
+
+        CREATE TABLE IF NOT EXISTS peca (
+            numeroSerie TEXT PRIMARY KEY,
+            nome TEXT NOT NULL,
+            tipoPeca TEXT,
+            ativo INTEGER DEFAULT 1,
+            createdAt DATETIME DEFAULT CURRENT_TIMESTAMP,
+            updatedAt DATETIME DEFAULT CURRENT_TIMESTAMP
+        );
+
+        CREATE TABLE IF NOT EXISTS estoque (
+            idEstoque INTEGER PRIMARY KEY AUTOINCREMENT,
+            numeroSeriePeca TEXT NOT NULL,
+            quantidade INTEGER NOT NULL,
+            valor REAL NOT NULL,
+            dataEntrada DATE,
+            FOREIGN KEY (numeroSeriePeca) REFERENCES Peca(numeroSerie)
+        );
+
+        CREATE TABLE IF NOT EXISTS servico (
+            numeroOS INTEGER PRIMARY KEY AUTOINCREMENT,
+            clientId INTEGER NOT NULL, -- NOVO: Referencia o ID do cliente
+            numeroSerieEquipamento TEXT NOT NULL,
+            idTipoServico INTEGER NOT NULL,
+            idFormaPagamento INTEGER NOT NULL,
+            valor REAL NOT NULL,
+            dataGarantia DATE,
+            ativo INTEGER DEFAULT 1,
+            createdAt DATETIME DEFAULT CURRENT_TIMESTAMP,
+            updatedAt DATETIME DEFAULT CURRENT_TIMESTAMP,
+            FOREIGN KEY (clientId) REFERENCES clientes(id), -- REFERENCIA O ID
+            FOREIGN KEY (numeroSerieEquipamento) REFERENCES equipamento(numeroSerie),
+            FOREIGN KEY (idTipoServico) REFERENCES tipoServico(idTipoServico),
+            FOREIGN KEY (idFormaPagamento) REFERENCES formaPagamento(idFormaPagamento)
+        );
+
+        CREATE TABLE IF NOT EXISTS servico_Peca (
+            numeroOS INTEGER,
+            numeroSeriePeca TEXT,
+            PRIMARY KEY (numeroOS, numeroSeriePeca),
+            FOREIGN KEY (numeroOS) REFERENCES Servico(numeroOS),
+            FOREIGN KEY (numeroSeriePeca) REFERENCES Peca(numeroSerie)
+        );
+        
+        
     `;
 
     db.exec(createTable);
@@ -45,6 +120,8 @@ function initializeDatabase() {
     dbInstance = db;
     return dbInstance;
 }
+
+
 
 // Exporta a função para ser usada no databaseHandlers.js
 module.exports = { initializeDatabase };

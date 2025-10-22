@@ -30,11 +30,13 @@ export const DatabaseService = {
         return ipcRenderer.invoke('update-client', client);
     },
 
-    // Deletar cliente
-    deleteClient: (id: string): Promise<void> => {
+    // Deletar cliente 
+    deleteClient: (id: string): Promise<{ type: 'soft' | 'hard', message: string }> => {
         if (!ipcRenderer) return Promise.reject("IPC indisponível");
+        // Recebe apenas o ID
         return ipcRenderer.invoke('delete-client', id);
     },
+// ...
 
     // Buscar cliente por ID
     getClient: (id: string): Promise<Client> => {
