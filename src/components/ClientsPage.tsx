@@ -26,9 +26,14 @@ interface ClientsPageProps {
   onOpenEditModal: (client: Client) => void;
   // Novo: Callback para App.tsx após a exclusão bem-sucedida
   onClientDeleted: (id: string) => void;
+  // NOVO: Adicionar as props para o filtro de inativos
+  showInactive: boolean; // Tipo boolean para o estado do checkbox
+  onToggleShowInactive: (show: boolean) => void;
+  onClientReactivated: (clientId: string) => void | Promise<void>;
+  isLoading: boolean;
 }
 
-export function ClientsPage({ onBack, clients, onOpenAddModal, onOpenEditModal, onClientDeleted }: ClientsPageProps) {
+export function ClientsPage({ onBack, clients, onOpenAddModal, onOpenEditModal, onClientDeleted, showInactive, onToggleShowInactive }: ClientsPageProps) {
   const [searchQuery, setSearchQuery] = useState("");
 
   const [clientToDeleteId, setClientToDeleteId] = useState<string | null>(null);
@@ -55,18 +60,37 @@ export function ClientsPage({ onBack, clients, onOpenAddModal, onOpenEditModal, 
     }
   };
 
+  const handleReactivateClient = async (clientId: string) => {
+  try {
+    const result = await DatabaseService.reactivateClient(clientId);
+    toast.success(result.message);
+
+    // Atualiza a lista após reativar
+    onClientDeleted(clientId); // pode ser renomeado depois para algo mais genérico, tipo onClientUpdated
+
+  } catch (error) {
+    console.error("Erro ao reativar cliente:", error);
+    const errorMessage = error instanceof Error ? error.message : "Erro desconhecido ao reativar cliente.";
+    toast.error(errorMessage);
+  }
+};
 
 
-  // Filter clients based on search
-  const filteredClients = clients.filter((client) => {
+
+ const filteredClients = clients
+  .filter((client) => {
     const query = searchQuery.toLowerCase();
-    // Acessa campos opcionais com ? (optional chaining)
     return (
       client.name.toLowerCase().includes(query) ||
       client.phone.toLowerCase().includes(query) ||
       client.email?.toLowerCase().includes(query) ||
       client.cpf?.toLowerCase().includes(query)
     );
+  })
+  .sort((a, b) => {
+    // Clientes ativos primeiro
+    if (a.ativo === b.ativo) return 0;
+    return a.ativo ? -1 : 1;
   });
 
   return (
@@ -90,7 +114,11 @@ export function ClientsPage({ onBack, clients, onOpenAddModal, onOpenEditModal, 
           >
             GERENCIAMENTO DE CLIENTES
           </h1>
+
+
         </div>
+
+
 
         {/* Search Bar and Add Button */}
         <div className="max-w-[500px] mx-auto">
@@ -104,7 +132,8 @@ export function ClientsPage({ onBack, clients, onOpenAddModal, onOpenEditModal, 
               onChange={(e) => setSearchQuery(e.target.value)}
             />
           </div>
-          <div className="flex justify-center">
+
+          <div className="flex items-center justify-center gap-4 mt-4">
             <Button
               onClick={onOpenAddModal}
               className="bg-[#8b7355] hover:bg-[#7a6345] text-white rounded-full px-6 py-2 flex items-center gap-2"
@@ -112,7 +141,22 @@ export function ClientsPage({ onBack, clients, onOpenAddModal, onOpenEditModal, 
               <Plus className="w-4 h-4" />
               Novo Cliente
             </Button>
+
+            {/* Checkbox à direita do botão */}
+            <div className="flex items-center space-x-2">
+              <input
+                type="checkbox"
+                id="show-inactive"
+                checked={showInactive}
+                onChange={(e) => onToggleShowInactive(e.target.checked)}
+                className="w-4 h-4 text-gray-800 bg-gray-100 border-gray-300 rounded focus:ring-gray-500"
+              />
+              <label htmlFor="show-inactive" className="text-sm font-medium text-gray-900">
+                Mostrar Inativos
+              </label>
+            </div>
           </div>
+
         </div>
       </div>
 
@@ -139,21 +183,36 @@ export function ClientsPage({ onBack, clients, onOpenAddModal, onOpenEditModal, 
                     {!client.ativo && <span className="text-sm font-normal ml-2">(Inativo)</span>}
                   </h2>
                   <div className="flex gap-2">
-                    <button
-                      onClick={() => onOpenEditModal(client)}
-                      className="p-1 hover:bg-gray-100 rounded-full transition-colors"
-                      title="Editar cliente"
-                    >
-                      <Pencil className="w-4 h-4 text-gray-600" />
-                    </button>
-                    <button
-                      onClick={() => setClientToDeleteId(client.id)}
-                      className="p-1 hover:bg-gray-100 rounded-full transition-colors"
-                      title="Excluir cliente"
-                    >
-                      <Trash2 className="w-4 h-4 text-red-600" />
-                    </button>
-                  </div>
+  {/* Botão editar (sempre visível) */}
+  <button
+    onClick={() => onOpenEditModal(client)}
+    className="p-1 hover:bg-gray-100 rounded-full transition-colors"
+    title="Editar cliente"
+  >
+    <Pencil className="w-4 h-4 text-gray-600" />
+  </button>
+
+  {/* Se o cliente estiver ativo → mostra o botão de excluir */}
+  {client.ativo ? (
+    <button
+      onClick={() => setClientToDeleteId(client.id)}
+      className="p-1 hover:bg-gray-100 rounded-full transition-colors"
+      title="Excluir cliente"
+    >
+      <Trash2 className="w-4 h-4 text-red-600" />
+    </button>
+  ) : (
+    /* Se estiver inativo → mostra o botão de reativar */
+    <button
+      onClick={() => handleReactivateClient(client.id)}
+      className="p-1 hover:bg-gray-100 rounded-full transition-colors"
+      title="Reativar cliente"
+    >
+      <ArrowLeft className="w-4 h-4 text-green-600 rotate-180" /> {/* Ícone "voltar" virado vira um símbolo de reativação */}
+    </button>
+  )}
+</div>
+
                 </div>
 
                 {/* Client Info */}
