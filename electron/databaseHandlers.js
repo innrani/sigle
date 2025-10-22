@@ -81,7 +81,7 @@ function setupDatabaseHandlers() {
             const { serviceCount } = db.prepare(checkServicesQuery).get(id); 
             
             // Variável booleana para simplificar a lógica
-            const isSoftDelete = !(serviceCount > 0);
+            const isSoftDelete = serviceCount > 0;
 
             // 2. Declaração ÚNICA com CONST, usando operador ternário para atribuir o valor
             const finalQuery = isSoftDelete
