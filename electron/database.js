@@ -23,7 +23,7 @@ function initializeDatabase() {
     // Cria a tabela de clientes se não existir
     // Adicionei a coluna 'ativo' (BOOLEAN/INTEGER) conforme seu frontend espera.
     const createTable = `
-        CREATE TABLE IF NOT EXISTS clientes (
+        CREATE TABLE IF NOT EXISTS clients (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             name TEXT NOT NULL,
             email TEXT,
@@ -31,84 +31,58 @@ function initializeDatabase() {
             cpf TEXT UNIQUE NOT NULL,
             address TEXT,
             city TEXT,
-            state TEXT,
-            zipCode TEXT,
+            state TEXT,            
             observations TEXT,
-            ativo INTEGER DEFAULT 1, 
-            createdAt DATETIME DEFAULT CURRENT_TIMESTAMP,
-            updatedAt DATETIME DEFAULT CURRENT_TIMESTAMP
+            is_active INTEGER DEFAULT 1, 
+            created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+            updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
         );
 
-        CREATE TABLE IF NOT EXISTS tipoServico (
-            idTipoServico INTEGER PRIMARY KEY AUTOINCREMENT,
-            tipoServico TEXT NOT NULL,
-            ativo INTEGER DEFAULT 1,
-            createdAt DATETIME DEFAULT CURRENT_TIMESTAMP,
-            updatedAt DATETIME DEFAULT CURRENT_TIMESTAMP
+        CREATE TABLE IF NOT EXISTS service_types (
+            type_id INTEGER PRIMARY KEY AUTOINCREMENT,
+            name TEXT NOT NULL
         );
 
-        CREATE TABLE IF NOT EXISTS formaPagamento (
-            idFormaPagamento INTEGER PRIMARY KEY AUTOINCREMENT,
-            formaPagamento TEXT NOT NULL,
-            ativo INTEGER DEFAULT 1,
-            createdAt DATETIME DEFAULT CURRENT_TIMESTAMP,
-            updatedAt DATETIME DEFAULT CURRENT_TIMESTAMP
+        CREATE TABLE IF NOT EXISTS payment_methods (
+            method_id INTEGER PRIMARY KEY AUTOINCREMENT,
+            name TEXT NOT NULL
+        );
+                
+        CREATE TABLE IF NOT EXISTS equipment (
+            equipment_id INTEGER PRIMARY KEY AUTOINCREMENT,
+            serial_number TEXT NOT NULL,
+            device_type TEXT NOT NULL,
+            brand TEXT NOT NULL,
+            model TEXT NOT NULL,            
+            accessories TEXT NOT NULL,            
+            is_active INTEGER DEFAULT 1,
+            created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+            updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
+        );
+        
+        CREATE TABLE IF NOT EXISTS service_orders (
+            order_number INTEGER PRIMARY KEY AUTOINCREMENT,
+            client_id INTEGER NOT NULL,
+            equipment_id INTEGER NOT NULL, 
+            service_type_id INTEGER NOT NULL,
+            payment_method_id INTEGER NOT NULL,
+            total_value REAL NOT NULL,
+            warranty_date DATE,
+            is_active INTEGER DEFAULT 1,
+            created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+            updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+            FOREIGN KEY (client_id) REFERENCES clients(id),
+            FOREIGN KEY (equipment_id) REFERENCES equipment(equipment_id), 
+            FOREIGN KEY (service_type_id) REFERENCES service_types(type_id),
+            FOREIGN KEY (payment_method_id) REFERENCES payment_methods(method_id)
         );
 
-        CREATE TABLE IF NOT EXISTS equipamento (
-            numeroSerie TEXT PRIMARY KEY,
-            tipoAparelho TEXT NOT NULL,
-            marca TEXT,
-            modelo TEXT,
-            corAparelho TEXT,
-            acessorios TEXT,
-            problemaRelatado TEXT,
-            ativo INTEGER DEFAULT 1,
-            createdAt DATETIME DEFAULT CURRENT_TIMESTAMP,
-            updatedAt DATETIME DEFAULT CURRENT_TIMESTAMP
-        );
-
-        CREATE TABLE IF NOT EXISTS peca (
-            numeroSerie TEXT PRIMARY KEY,
-            nome TEXT NOT NULL,
-            tipoPeca TEXT,
-            ativo INTEGER DEFAULT 1,
-            createdAt DATETIME DEFAULT CURRENT_TIMESTAMP,
-            updatedAt DATETIME DEFAULT CURRENT_TIMESTAMP
-        );
-
-        CREATE TABLE IF NOT EXISTS estoque (
-            idEstoque INTEGER PRIMARY KEY AUTOINCREMENT,
-            numeroSeriePeca TEXT NOT NULL,
-            quantidade INTEGER NOT NULL,
-            valor REAL NOT NULL,
-            dataEntrada DATE,
-            FOREIGN KEY (numeroSeriePeca) REFERENCES Peca(numeroSerie)
-        );
-
-        CREATE TABLE IF NOT EXISTS servico (
-            numeroOS INTEGER PRIMARY KEY AUTOINCREMENT,
-            clientId INTEGER NOT NULL, -- NOVO: Referencia o ID do cliente
-            numeroSerieEquipamento TEXT NOT NULL,
-            idTipoServico INTEGER NOT NULL,
-            idFormaPagamento INTEGER NOT NULL,
-            valor REAL NOT NULL,
-            dataGarantia DATE,
-            ativo INTEGER DEFAULT 1,
-            createdAt DATETIME DEFAULT CURRENT_TIMESTAMP,
-            updatedAt DATETIME DEFAULT CURRENT_TIMESTAMP,
-            FOREIGN KEY (clientId) REFERENCES clientes(id), -- REFERENCIA O ID
-            FOREIGN KEY (numeroSerieEquipamento) REFERENCES equipamento(numeroSerie),
-            FOREIGN KEY (idTipoServico) REFERENCES tipoServico(idTipoServico),
-            FOREIGN KEY (idFormaPagamento) REFERENCES formaPagamento(idFormaPagamento)
-        );
-
-        CREATE TABLE IF NOT EXISTS servico_Peca (
-            numeroOS INTEGER,
-            numeroSeriePeca TEXT,
-            PRIMARY KEY (numeroOS, numeroSeriePeca),
-            FOREIGN KEY (numeroOS) REFERENCES Servico(numeroOS),
-            FOREIGN KEY (numeroSeriePeca) REFERENCES Peca(numeroSerie)
+        CREATE TABLE IF NOT EXISTS service_parts (
+            order_number INTEGER,
+            part_serial_number TEXT,
+            PRIMARY KEY (order_number, part_serial_number),
+            FOREIGN KEY (order_number) REFERENCES service_orders(order_number),
+            FOREIGN KEY (part_serial_number) REFERENCES parts(serial_number)
         );
         
         

@@ -77,9 +77,9 @@ export default function App() {
 
     const clientsToDisplay = showInactive
         ? clients
-        : clients.filter((c) => c.ativo);
+        : clients.filter((c) => c.is_active);
 
-    const activeClients = clients.filter((c) => c.ativo);
+    const activeClients = clients.filter((c) => c.is_active);
 
     return (
         <DndProvider backend={HTML5Backend}>
