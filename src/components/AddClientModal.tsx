@@ -23,8 +23,7 @@ const initialFormData: NewClient = {
     cpf: null,
     address: null,
     city: null,
-    state: null,
-    zipCode: null,
+    state: null,    
     observations: null,
 };
 
@@ -53,8 +52,7 @@ export function AddClientModal({ open, onOpenChange, onClientAdded }: AddClientM
       cpf: formData.cpf || null,
       address: formData.address || null,
       city: formData.city || null,
-      state: formData.state || null,
-      zipCode: formData.zipCode || null,
+      state: formData.state || null,      
       observations: formData.observations || null,
     };
     

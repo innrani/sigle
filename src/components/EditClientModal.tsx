@@ -25,12 +25,11 @@ const emptyClient: Client = {
     cpf: null,
     address: null,
     city: null,
-    state: null,
-    zipCode: null,
+    state: null,    
     observations: null,
-    ativo: true,
-    createdAt: "",
-    updatedAt: "",
+    is_active: true,
+    created_at: "",
+    updated_at: "",
 };
 
 export function EditClientModal({ open, onOpenChange, client, onClientUpdated }: EditClientModalProps) {
@@ -48,8 +47,7 @@ export function EditClientModal({ open, onOpenChange, client, onClientUpdated }:
         cpf: client.cpf || "",
         address: client.address || "",
         city: client.city || "",
-        state: client.state || "",
-        zipCode: client.zipCode || "",
+        state: client.state || "",        
         observations: client.observations || "",
       });
     } else {
@@ -79,8 +77,7 @@ export function EditClientModal({ open, onOpenChange, client, onClientUpdated }:
         cpf: formData.cpf || null,
         address: formData.address || null,
         city: formData.city || null,
-        state: formData.state || null,
-        zipCode: formData.zipCode || null,
+        state: formData.state || null,        
         observations: formData.observations || null,
     }
 

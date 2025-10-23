@@ -29,7 +29,7 @@ interface ClientsPageProps {
   // NOVO: Adicionar as props para o filtro de inativos
   showInactive: boolean; // Tipo boolean para o estado do checkbox
   onToggleShowInactive: (show: boolean) => void;
-  onClientReactivated: (clientId: string) => void | Promise<void>;
+  onClientReactivated: (client_id: string) => void | Promise<void>;
   isLoading: boolean;
 }
 
@@ -39,13 +39,13 @@ export function ClientsPage({ onBack, clients, onOpenAddModal, onOpenEditModal, 
   const [clientToDeleteId, setClientToDeleteId] = useState<string | null>(null);
 
   // SUBSTITUA a função handleDeleteClient
-  const handleDeleteClient = async (clientId: string) => {
+  const handleDeleteClient = async (client_id: string) => {
     try {
       // 1. CHAMA O BACKEND PARA DELETAR
-      const result = await DatabaseService.deleteClient(clientId);
+      const result = await DatabaseService.deleteClient(client_id);
 
       // 2. Notifica o App.tsx para remover o cliente do estado local
-      onClientDeleted(clientId);
+      onClientDeleted(client_id);
 
       // 3. Exibe a mensagem de sucesso com a resposta do Soft Delete
       toast.success(result.message);
@@ -60,13 +60,13 @@ export function ClientsPage({ onBack, clients, onOpenAddModal, onOpenEditModal, 
     }
   };
 
-  const handleReactivateClient = async (clientId: string) => {
+  const handleReactivateClient = async (client_id: string) => {
   try {
-    const result = await DatabaseService.reactivateClient(clientId);
+    const result = await DatabaseService.reactivateClient(client_id);
     toast.success(result.message);
 
     // Atualiza a lista após reativar
-    onClientDeleted(clientId); // pode ser renomeado depois para algo mais genérico, tipo onClientUpdated
+    onClientDeleted(client_id); // pode ser renomeado depois para algo mais genérico, tipo onClientUpdated
 
   } catch (error) {
     console.error("Erro ao reativar cliente:", error);
@@ -88,9 +88,9 @@ export function ClientsPage({ onBack, clients, onOpenAddModal, onOpenEditModal, 
     );
   })
   .sort((a, b) => {
-    // Clientes ativos primeiro
-    if (a.ativo === b.ativo) return 0;
-    return a.ativo ? -1 : 1;
+    // Clientes is_actives primeiro
+    if (a.is_active === b.is_active) return 0;
+    return a.is_active ? -1 : 1;
   });
 
   return (
@@ -178,9 +178,9 @@ export function ClientsPage({ onBack, clients, onOpenAddModal, onOpenEditModal, 
               >
                 {/* Header and Actions */}
                 <div className="flex items-start justify-between mb-4">
-                  <h2 className={`text-lg font-semibold ${client.ativo ? 'text-gray-800' : 'text-red-500'}`}>
+                  <h2 className={`text-lg font-semibold ${client.is_active ? 'text-gray-800' : 'text-red-500'}`}>
                     {client.name}
-                    {!client.ativo && <span className="text-sm font-normal ml-3">(Inativo)</span>}
+                    {!client.is_active && <span className="text-sm font-normal ml-3">(Inativo)</span>}
                   </h2>
                   <div className="flex gap-2">
   {/* Botão editar (sempre visível) */}
@@ -193,7 +193,7 @@ export function ClientsPage({ onBack, clients, onOpenAddModal, onOpenEditModal, 
   </button>
 
   {/* Se o cliente estiver ativo → mostra o botão de excluir */}
-  {client.ativo ? (
+  {client.is_active ? (
     <button
       onClick={() => setClientToDeleteId(client.id)}
       className="p-1 hover:bg-gray-100 rounded-full transition-colors"
