@@ -135,6 +135,107 @@ function setupDatabaseHandlers() {
             throw new Error("Falha ao buscar cliente por ID no banco de dados.");
         }
     });
+
+// ------------------------------------
+// Handlers para Equipamentos (CORRIGIDO)
+// ------------------------------------
+
+// 1. Adicionar novo equipamento
+ipcMain.handle('add-equipment', async (event, equipment) => {
+    try {
+        const query = `
+            INSERT INTO equipment (serial_number, device_type, brand, model, accessories, is_active)
+            VALUES (@serial_number, @device_type, @brand, @model, @accessories, 1)
+        `;
+        const result = db.prepare(query).run(equipment); 
+        
+        // Retorna o equipamento completo usando o ID gerado (equipment_id)
+        const newEquipment = db.prepare('SELECT * FROM equipment WHERE equipment_id = ?').get(result.lastInsertRowid);
+        return newEquipment;
+
+    } catch (error) {
+        // Assume que 'serial_number' é UNIQUE, o que é recomendado para equipamentos
+        if (error.code === 'SQLITE_CONSTRAINT_UNIQUE' || error.message.includes('serial_number')) {
+             throw new Error("Já existe um equipamento cadastrado com este Número de Série.");
+        }
+        console.error("Erro ao adicionar equipamento:", error);
+        throw new Error("Falha ao cadastrar equipamento no banco de dados.");
+    }
+});
+
+// 2. Listar SOMENTE equipamentos ativos (is_active = 1)
+ipcMain.handle('list-active-equipments', async () => {
+    try {
+        const query = 'SELECT * FROM equipment WHERE is_active = 1 ORDER BY model';
+        return db.prepare(query).all();
+    } catch (error) {
+        console.error("Erro ao listar equipamentos ativos:", error);
+        throw new Error("Falha ao buscar equipamentos ativos no banco de dados.");
+    }
+});
+
+
+// 3. Listar TODOS os equipamentos (ativos e inativos) - Para tela de gerenciamento
+ipcMain.handle('list-all-equipments', async () => {
+    try {
+        const query = 'SELECT * FROM equipment ORDER BY model';
+        return db.prepare(query).all();
+    } catch (error) {
+        console.error("Erro ao listar todos os equipamentos:", error);
+        throw new Error("Falha ao buscar todos os equipamentos no banco de dados.");
+    }
+});
+
+
+// 4. Deletar/Inativar equipamento (Soft Delete)
+ipcMain.handle('delete-equipment', async (event, equipment_id) => {
+    try {
+        // 1. Obtém o serial_number, que é a chave de ligação com a tabela 'servico'
+        const equipment = db.prepare('SELECT serial_number FROM equipment WHERE equipment_id = ?').get(equipment_id);
+        
+        if (!equipment) {
+            throw new Error("Equipamento não encontrado para exclusão.");
+        }
+        
+        const serialNumber = equipment.serial_number;
+
+        // 2. Verifica se o equipamento tem serviços/OS associados
+        const serviceCountQuery = 'SELECT COUNT(*) AS count FROM service_orders WHERE equipment_id = ?';
+        const { count: serviceCount } = db.prepare(serviceCountQuery).get(serialNumber);
+
+        const isSoftDelete = serviceCount > 0;
+
+        // 3. Executa a exclusão (Soft ou Hard) usando o PK (equipment_id)
+        const finalQuery = isSoftDelete
+            ? 'UPDATE equipment SET is_active = 0, updated_at = CURRENT_TIMESTAMP WHERE equipment_id = ?' // Soft Delete
+            : 'DELETE FROM equipment WHERE equipment_id = ?'; // Hard Delete
+
+        const resultMessage = isSoftDelete
+            ? { type: 'soft', message: `Equipamento (SN: ${serialNumber}) possui ${serviceCount} OS(s) e foi inativado.` }
+            : { type: 'hard', message: `Equipamento (ID: ${equipment_id}) excluído permanentemente.` };
+        
+        db.prepare(finalQuery).run(equipment_id);
+
+        return resultMessage;
+
+    } catch (error) {
+        console.error("Erro ao deletar/inativar equipamento:", error);
+        throw new Error("Falha ao processar exclusão do equipamento no banco de dados.");
+    }
+});
+
+// 5. Reativar equipamento inativo
+ipcMain.handle('reactivate-equipment', async (event, equipment_id) => {
+    try {
+        const query = 'UPDATE equipment SET is_active = 1, updated_at = CURRENT_TIMESTAMP WHERE equipment_id = ?';
+        db.prepare(query).run(equipment_id);
+        return { success: true, message: 'Equipamento reativado com sucesso.' };
+    } catch (error) {
+        console.error("Erro ao reativar equipamento:", error);
+        throw new Error("Falha ao reativar equipamento no banco de dados.");
+    }
+});
+
 }
 
 

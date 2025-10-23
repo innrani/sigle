@@ -21,6 +21,8 @@ export default function App() {
     const [clientToEdit, setClientToEdit] = useState<Client | null>(null);
     const [searchQuery, setSearchQuery] = useState("");
 
+    
+
     // Função para carregar todos os clientes
     const fetchClients = async () => {
         try {
