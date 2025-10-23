@@ -54,8 +54,8 @@ function initializeDatabase() {
             device_type TEXT NOT NULL,
             brand TEXT NOT NULL,
             model TEXT NOT NULL,            
-            accessories TEXT NOT NULL,            
-            is_active INTEGER DEFAULT 1,
+            accessories TEXT NOT NULL,
+            is_active INTEGER DEFAULT 1, 
             created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
             updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
         );
