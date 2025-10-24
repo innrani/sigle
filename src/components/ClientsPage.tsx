@@ -81,10 +81,10 @@ export function ClientsPage({ onBack, clients, onOpenAddModal, onOpenEditModal, 
   .filter((client) => {
     const query = searchQuery.toLowerCase();
     return (
-      client.name.toLowerCase().includes(query) ||
-      client.phone.toLowerCase().includes(query) ||
-      client.email?.toLowerCase().includes(query) ||
-      typeof client.cpf === "string" && (client.cpf as string).toLowerCase().includes(query)
+      (client.name || '').toLowerCase().includes(query) ||
+      (client.phone || '').toLowerCase().includes(query) ||
+      (client.email || '').toLowerCase().includes(query) ||
+      (client.cpf || '').toLowerCase().includes(query)
     );
   })
   .sort((a, b) => {
