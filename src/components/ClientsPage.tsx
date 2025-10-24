@@ -84,11 +84,11 @@ export function ClientsPage({ onBack, clients, onOpenAddModal, onOpenEditModal, 
       client.name.toLowerCase().includes(query) ||
       client.phone.toLowerCase().includes(query) ||
       client.email?.toLowerCase().includes(query) ||
-      client.cpf?.toLowerCase().includes(query)
+      typeof client.cpf === "string" && (client.cpf as string).toLowerCase().includes(query)
     );
   })
   .sort((a, b) => {
-    // Clientes is_actives primeiro
+    // Clientes is_active primeiro
     if (a.is_active === b.is_active) return 0;
     return a.is_active ? -1 : 1;
   });
