@@ -28,7 +28,7 @@ function initializeDatabase() {
             name TEXT NOT NULL,
             email TEXT,
             phone TEXT NOT NULL,
-            cpf TEXT UNIQUE NOT NULL,
+            cpf TEXT UNIQUE,
             address TEXT,
             city TEXT,
             state TEXT,            
@@ -125,6 +125,41 @@ function initializeDatabase() {
         }
     } catch (e) {
         console.warn('Erro ao checar/atualizar coluna accessories:', e);
+    }
+    
+    // Migração: garantir que a coluna cpf permita NULL (remover NOT NULL legado)
+    try {
+        const cols = db.prepare("PRAGMA table_info('clients')").all();
+        const cpfCol = cols.find((c) => c.name === 'cpf');
+        if (cpfCol && cpfCol.notnull === 1) {
+            // Recria a tabela sem NOT NULL em cpf
+            db.exec('PRAGMA foreign_keys=OFF; BEGIN TRANSACTION;');
+            db.exec(`
+                CREATE TABLE clients_new (
+                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    name TEXT NOT NULL,
+                    email TEXT,
+                    phone TEXT NOT NULL,
+                    cpf TEXT UNIQUE,
+                    address TEXT,
+                    city TEXT,
+                    state TEXT,
+                    observations TEXT,
+                    is_active INTEGER DEFAULT 1,
+                    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+                    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
+                );
+                INSERT INTO clients_new (id, name, email, phone, cpf, address, city, state, observations, is_active, created_at, updated_at)
+                SELECT id, name, email, phone, NULLIF(cpf, ''), address, city, state, observations, is_active, created_at, updated_at FROM clients;
+                DROP TABLE clients;
+                ALTER TABLE clients_new RENAME TO clients;
+                COMMIT;
+                PRAGMA foreign_keys=ON;
+            `);
+        }
+    } catch (e) {
+        console.error('Falha na migração de cpf para permitir NULL:', e);
+        try { db.exec('ROLLBACK; PRAGMA foreign_keys=ON;'); } catch {}
     }
     
     // Configura a instância e retorna

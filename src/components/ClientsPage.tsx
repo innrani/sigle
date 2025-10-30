@@ -129,7 +129,7 @@ export function ClientsPage({ onBack, clients, onOpenAddModal, onOpenEditModal, 
             <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 opacity-50" />
             <input
               type="text"
-              placeholder="Buscar cliente por nome, telefone ou CPF..."
+              placeholder="Buscar por nome, telefone, e-mail ou CPF/CNPJ..."
               className="w-full pl-9 pr-3 py-1.5 border border-gray-300 rounded-full bg-white text-sm focus:outline-none focus:border-[#8b7355] transition-colors shadow-sm"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
@@ -142,7 +142,7 @@ export function ClientsPage({ onBack, clients, onOpenAddModal, onOpenEditModal, 
               className="bg-[#8b7355] hover:bg-[#7a6345] text-white rounded-full px-6 py-2 flex items-center gap-2"
             >
               <Plus className="w-4 h-4" />
-              Novo Cliente
+              Novo Cliente/Instituição
             </Button>
 
             {/* Checkbox à direita do botão */}
@@ -282,12 +282,12 @@ export function ClientsPage({ onBack, clients, onOpenAddModal, onOpenEditModal, 
             <Dialog open={!!viewClient} onOpenChange={() => setViewClient(null)}>
               <DialogContent className="max-w-2xl">
                 <DialogHeader>
-                  <DialogTitle>Detalhes do Cliente</DialogTitle>
+                  <DialogTitle>Detalhes do Cliente/Instituição</DialogTitle>
                 </DialogHeader>
                 {viewClient && (
                   <div className="grid grid-cols-2 gap-4">
                     <div>
-                      <label className="text-sm font-semibold text-gray-600">Nome:</label>
+                      <label className="text-sm font-semibold text-gray-600">Nome do Cliente ou Instituição:</label>
                       <p className="text-base">{viewClient.name}</p>
                     </div>
                     <div>
@@ -299,7 +299,7 @@ export function ClientsPage({ onBack, clients, onOpenAddModal, onOpenEditModal, 
                       <p className="text-base">{viewClient.email || "Não informado"}</p>
                     </div>
                     <div>
-                      <label className="text-sm font-semibold text-gray-600">CNPJ:</label>
+                      <label className="text-sm font-semibold text-gray-600">CPF/CNPJ:</label>
                       <p className="text-base">{viewClient.cpf || "Não informado"}</p>
                     </div>
                     <div className="col-span-2">

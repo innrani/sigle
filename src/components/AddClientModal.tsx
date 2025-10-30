@@ -82,19 +82,19 @@ export function AddClientModal({ open, onOpenChange, onClientAdded }: AddClientM
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-lg">
         <DialogHeader>
-          <DialogTitle>Nova Instituição</DialogTitle>
+          <DialogTitle>Novo Cliente/Instituição</DialogTitle>
           <DialogDescription>
-            Preencha os dados da instituição (escola, colégio, instituto) para cadastro.
+            Preencha os dados do cliente ou instituição (escola, colégio, instituto) para cadastro.
           </DialogDescription>
         </DialogHeader>
         <form onSubmit={handleSubmit} className="space-y-4">
           
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Label htmlFor="name">Nome da Instituição *</Label>
+              <Label htmlFor="name">Nome do Cliente ou Instituição *</Label>
               <Input 
                 id="name" 
-                placeholder="Ex: Escola Municipal Centro, IFBA Campus Salvador"
+                placeholder="Ex: João Silva ou IFBA Campus Salvador"
                 value={formData.name}
                 onChange={handleChange}
                 required
@@ -125,10 +125,10 @@ export function AddClientModal({ open, onOpenChange, onClientAdded }: AddClientM
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="cpf">CNPJ (opcional)</Label>
+              <Label htmlFor="cpf">CPF ou CNPJ</Label>
               <Input 
                 id="cpf" 
-                placeholder="00.000.000/0000-00"
+                placeholder="000.000.000-00 ou 00.000.000/0000-00"
                 value={formData.cpf || ""}
                 onChange={handleChange}
               />

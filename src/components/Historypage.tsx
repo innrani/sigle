@@ -1,4 +1,4 @@
-import { ArrowLeft } from "lucide-react";
+// Removed unused import
 
 interface HistoryPageProps {
   onBack: () => void;

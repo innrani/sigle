@@ -34,11 +34,23 @@ function setupDatabaseHandlers() {
     // Adicionar novo cliente
     ipcMain.handle('add-client', async (event, client) => {
         try {
+            // Garante chaves presentes e mapeia strings vazias para NULL
+            const payload = {
+                name: client.name,
+                email: client.email ?? null,
+                phone: client.phone,
+                cpf: client.cpf ? client.cpf : null,
+                address: client.address ?? null,
+                city: client.city ?? null,
+                state: client.state ?? null,
+                observations: client.observations ?? null,
+            };
+
             const query = `
-                INSERT INTO clients (name, email, phone, cpf, address, city, state,observations, is_active)
+                INSERT INTO clients (name, email, phone, cpf, address, city, state, observations, is_active)
                 VALUES (@name, @email, @phone, @cpf, @address, @city, @state, @observations, 1)
             `;
-            const result = db.prepare(query).run(client);
+            const result = db.prepare(query).run(payload);
 
             const newClient = db.prepare('SELECT * FROM clients WHERE id = ?').get(result.lastInsertRowid);
             return newClient;
@@ -143,38 +155,37 @@ function setupDatabaseHandlers() {
 // 1. Adicionar novo equipamento
 ipcMain.handle('add-equipment', async (event, equipment) => {
     try {
-        // Aceita tanto camelCase (frontend) quanto snake_case
-        const serial_number = equipment.serialNumber ?? equipment.serial_number ?? '';
-        const device_type = equipment.device ?? equipment.device_type ?? '';
-        const brand = equipment.brand ?? '';
-        const model = equipment.model ?? '';
-        const accessories = equipment.accessories ? JSON.stringify(equipment.accessories) : JSON.stringify([]);
+    // Aceita tanto camelCase (frontend) quanto snake_case
+    const serial_number = equipment.serialNumber ?? equipment.serial_number ?? '';
+    const device_type = equipment.device ?? equipment.device_type ?? '';
+    const brand = equipment.brand ?? '';
+    const model = equipment.model ?? '';
+    const accessories = equipment.accessories ? JSON.stringify(equipment.accessories) : JSON.stringify([]);
 
-        const query = `
-            INSERT INTO equipment (serial_number, device_type, brand, model, accessories, is_active)
-            VALUES (@serial_number, @device_type, @brand, @model, @accessories, 1)
-        `;
-        const result = db.prepare(query).run({ serial_number, device_type, brand, model, accessories });
+    const query = `
+        INSERT INTO equipment (serial_number, device_type, brand, model, accessories, is_active)
+        VALUES (@serial_number, @device_type, @brand, @model, @accessories, 1)
+    `;
+    const result = db.prepare(query).run({ serial_number, device_type, brand, model, accessories });
 
-        // Retorna o equipamento completo usando o ID gerado (equipment_id)
-        const row = db.prepare('SELECT * FROM equipment WHERE equipment_id = ?').get(result.lastInsertRowid);
-        const parsedAccessories = row && row.accessories ? (function(){ try { return JSON.parse(row.accessories); } catch(e){ return []; } })() : [];
-        const newEquipment = row ? {
-            id: String(row.equipment_id),
-            device: row.device_type,
-            brand: row.brand,
-            model: row.model,
-            serialNumber: row.serial_number,
-            accessories: parsedAccessories,
-            isActive: Boolean(row.is_active),
-            created_at: row.created_at,
-            updated_at: row.updated_at
-        } : null;
-        return newEquipment;
+    // Retorna o equipamento completo usando o ID gerado (equipment_id)
+    const row = db.prepare('SELECT * FROM equipment WHERE equipment_id = ?').get(result.lastInsertRowid);
+    const parsedAccessories = row && row.accessories ? (function(){ try { return JSON.parse(row.accessories); } catch(e){ return []; } })() : [];
+    const newEquipment = row ? {
+        id: String(row.equipment_id),
+        device: row.device_type,
+        brand: row.brand,
+        model: row.model,
+        serialNumber: row.serial_number,
+        accessories: parsedAccessories,
+        isActive: Boolean(row.is_active),
+        created_at: row.created_at,
+        updated_at: row.updated_at
+    } : null;
+    return newEquipment;
 
     } catch (error) {
-        // Assume que 'serial_number' é UNIQUE, o que é recomendado para equipamentos
-        if (error.code === 'SQLITE_CONSTRAINT_UNIQUE' || error.message.includes('serial_number')) {
+        if (error.code === 'SQLITE_CONSTRAINT_UNIQUE' || (error.message && error.message.includes('serial_number'))) {
              throw new Error("Já existe um equipamento cadastrado com este Número de Série.");
         }
         console.error("Erro ao adicionar equipamento:", error);
@@ -238,6 +249,7 @@ ipcMain.handle('delete-equipment', async (event, equipment_id) => {
         if (!equipment) {
             throw new Error("Equipamento não encontrado para exclusão.");
         }
+        const serialNumber = equipment.serial_number;
 
         // 2. Verifica se o equipamento tem serviços/OS associados (usa equipment_id como FK)
         const serviceCountQuery = 'SELECT COUNT(*) AS count FROM service_orders WHERE equipment_id = ?';
@@ -280,7 +292,7 @@ ipcMain.handle('reactivate-equipment', async (event, equipment_id) => {
 ipcMain.handle('update-equipment', async (event, equipment_id, updates) => {
     try {
         // Aceita camelCase do frontend. Converte accessories para JSON string.
-        const serial_number = updates.serialNumber ?? updates.serial_number ?? updates.serial_number ?? '';
+        const serial_number = updates.serialNumber ?? updates.serial_number ?? '';
         const device_type = updates.device ?? updates.device_type ?? '';
         const brand = updates.brand ?? '';
         const model = updates.model ?? '';
@@ -324,11 +336,21 @@ ipcMain.handle('update-equipment', async (event, equipment_id, updates) => {
 
     ipcMain.handle('create-part', async (event, part) => {
         try {
+            // Garante que todos os parâmetros nomeados existam
+            const payload = {
+                type: part.type ?? null,
+                name: part.name,
+                description: part.description ?? null,
+                quantity: Number(part.quantity ?? 0),
+                price: part.price != null ? Number(part.price) : null,
+                unit: part.unit ?? null,
+            };
+
             const query = `
                 INSERT INTO parts (type, name, description, quantity, price, unit, is_active)
                 VALUES (@type, @name, @description, @quantity, @price, @unit, 1)
             `;
-            const result = db.prepare(query).run(part);
+            const result = db.prepare(query).run(payload);
             const newPart = db.prepare('SELECT * FROM parts WHERE id = ?').get(result.lastInsertRowid);
             return newPart;
         } catch (error) {

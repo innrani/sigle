@@ -2,6 +2,7 @@ import { useState } from "react";
 import { toast } from "sonner";
 import { DatabaseService } from "../services/database";
 import { PART_TYPES } from "../lib/constants";
+import type { Part } from "../types";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
@@ -21,14 +22,7 @@ interface FormValues {
   price: string;
 }
 
-interface Part {
-  id: string;
-  type?: string;
-  name: string;
-  description?: string;
-  quantity: number;
-  price: number;
-}
+// Use shared Part type from src/types
 
 const partSchema = z.object({
   type: z.string().min(1, "Tipo é obrigatório"),
@@ -38,13 +32,7 @@ const partSchema = z.object({
   price: z.string(),
 });
 
-interface Part {
-  id: string;
-  name: string;
-  description?: string;
-  quantity: number;
-  price: number;
-}
+// Removed duplicate local Part interface
 
 interface EditPartModalProps {
   open: boolean;
@@ -62,8 +50,8 @@ export function EditPartModal({ open, onOpenChange, part, onEditPart }: EditPart
       type: part?.type ?? "",
       name: part?.name ?? "",
       description: part?.description ?? "",
-      quantity: part?.quantity.toString() ?? "0",
-      price: part?.price.toString() ?? "0",
+      quantity: part?.quantity != null ? String(part.quantity) : "0",
+      price: part?.price != null ? String(part.price) : "0",
     },
   });
 
