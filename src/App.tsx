@@ -1,6 +1,6 @@
 // Main application entry point - Refactored for better modularity
 
-import React, { useState, useCallback, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { DndProvider } from "react-dnd";
 import { HTML5Backend } from "react-dnd-html5-backend";
 import { toast } from "sonner";
@@ -33,12 +33,11 @@ export default function App() {
   // State
   const [clients, setClients] = useState<Client[]>([]);
   const [parts, setParts] = useState<Part[]>([]);
-  const [appointments, setAppointments] = useState<any[]>([]);
+  // Removed unused appointments state
   const [technicians, setTechnicians] = useState<Technician[]>([]);
-  const [activeTechnicianId, setActiveTechnicianId] = useState<string | null>(null);
   const [isLoadingClients, setIsLoadingClients] = useState(true);
   const [showInactive, setShowInactive] = useState(false);
-  const [searchQuery, setSearchQuery] = useState("");
+  // Removed unused searchQuery state
 
   // Page navigation state
   const [currentPage, setCurrentPage] = useState<PageType>("main");
@@ -49,7 +48,7 @@ export default function App() {
   const [isEditClientModalOpen, setIsEditClientModalOpen] = useState(false);
   const [isEditPartModalOpen, setIsEditPartModalOpen] = useState(false);
   const [isTechniciansModalOpen, setIsTechniciansModalOpen] = useState(false);
-  const [isTechnicianSelectionModalOpen, setIsTechnicianSelectionModalOpen] = useState(false);
+  // Removed unused technician selection modal state
 
   // Edit states
   const [clientToEdit, setClientToEdit] = useState<Client | null>(null);
@@ -84,15 +83,7 @@ export default function App() {
   }, []);
   // ==================== HANDLERS ====================
 
-  const moveCard = useCallback((dragIndex: number, hoverIndex: number) => {
-    setAppointments((prev) => {
-      const newCards = [...prev];
-      const dragged = newCards[dragIndex];
-      newCards.splice(dragIndex, 1);
-      newCards.splice(hoverIndex, 0, dragged);
-      return newCards;
-    });
-  }, []);
+  // Removed unused DnD moveCard handler
 
   // Client handlers
   const handleClientAdded = async () => {
@@ -154,18 +145,13 @@ export default function App() {
     toast.success("Técnico excluído com sucesso");
   };
 
-  const handleSelectTechnician = (id: string) => {
-    setActiveTechnicianId(id);
-    setIsTechnicianSelectionModalOpen(false);
-  };
+  // Removed unused handleSelectTechnician
 
   // Filter active clients
   const clientsToDisplay = showInactive
     ? clients
     : clients.filter((c) => c.is_active);
 
-  const activeClients = clients.filter((c) => c.is_active);
-  const activeTechnician = activeTechnicianId ? technicians.find((t) => t.id === activeTechnicianId) ?? null : null;
 
   // ==================== RENDER ====================
 
@@ -199,8 +185,6 @@ export default function App() {
         ) : (
           <MainLayout
             currentTime={currentTime}
-            clients={activeClients}
-            activeTechnician={activeTechnician}
             onOpenAddModal={() => setIsClientModalOpen(true)}
             onNavigateToClients={() => setCurrentPage("clients")}
             onNavigateToParts={() => setCurrentPage("parts")}

@@ -55,6 +55,7 @@ export interface Part {
   id: string;
   type?: string;
   name: string;
+  description?: string;
   quantity: number;
   unit?: string;
   price?: number;

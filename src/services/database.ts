@@ -70,38 +70,7 @@ function seedIfEmpty() {
 
 seedIfEmpty();
 
-export interface Client {
-  id: string;
-  name: string;
-  phone?: string;
-  email?: string;
-  cpf?: string;
-  isActive?: boolean;
-  createdAt?: string;
-  updatedAt?: string;
-}
-
-const STORAGE_KEYS = {
-  CLIENTS: "sigle_clients_v1",
-};
-
-function uid() {
-  // fallback simple id generator
-  return (Date.now().toString(36) + Math.random().toString(36).slice(2, 8));
-}
-
-function loadClients(): Client[] {
-  try {
-    const raw = localStorage.getItem(STORAGE_KEYS.CLIENTS);
-    return raw ? JSON.parse(raw) : [];
-  } catch {
-    return [];
-  }
-}
-
-function saveClients(clients: Client[]) {
-  localStorage.setItem(STORAGE_KEYS.CLIENTS, JSON.stringify(clients));
-}
+// Removed duplicate Client interface and unused local storage helpers
 
 export const DatabaseService = {
   // Parts
