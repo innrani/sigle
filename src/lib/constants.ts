@@ -56,12 +56,4 @@ export const UNITS = [
 
 export type Unit = typeof UNITS[number];
 
-// Service Order Status
-export const SERVICE_ORDER_STATUS = {
-  PENDING: 'pending',
-  IN_PROGRESS: 'in-progress',
-  COMPLETED: 'completed',
-  CANCELED: 'canceled'
-} as const;
-
-export type ServiceOrderStatus = typeof SERVICE_ORDER_STATUS[keyof typeof SERVICE_ORDER_STATUS];
+// (Service order statuses removed)

@@ -1,33 +1,17 @@
 import {
-  FileText,
-  ShieldCheck,
-  FileEdit,
-  Receipt,
   Wrench,
   User,
   Settings,
-  UserCog,
   Laptop,
 } from "lucide-react";
 import { Badge } from "./ui/badge";
 import type { Technician } from "../types";
 
 // TODO: Backend - Replace with real notification counts from database
-const menuItems = [
-  { icon: FileText, label: "HISTÓRICO", badge: 0 },
-  { icon: ShieldCheck, label: "GARANTIAS", badge: 3 },
-  { icon: FileEdit, label: "ORÇAMENTOS", badge: 5 },
-  { icon: Receipt, label: "NOTAS FISCAIS", badge: 0 },
-  { icon: Wrench, label: "PEÇAS", badge: 2 },
-  { icon: User, label: "CLIENTE", badge: 0 },
-  { icon: Settings, label: "CONFIGURAÇÕES", badge: 0 },
-];
 
 interface RightSidebarProps {
   activeTechnician?: Technician | null;
-  onAddServiceOrder: () => void;
   onAddClient: () => void;
-  onNavigateToHistory: () => void;
   onNavigateToClients: () => void;
   onNavigateToParts: () => void;
   onNavigateToEquipments: () => void;
@@ -37,9 +21,7 @@ interface RightSidebarProps {
 
 export function RightSidebar({
   activeTechnician,
-  onAddServiceOrder,
   onAddClient,
-  onNavigateToHistory,
   onNavigateToClients,
   onNavigateToParts,
   onNavigateToEquipments,
@@ -95,22 +77,7 @@ export function RightSidebar({
         )}
       </div>
 
-      <button
-        onClick={onAddServiceOrder}
-        className="bg-[#d4c5a0] text-black rounded-full py-2 px-4 mb-1.5 flex items-center justify-center gap-2 hover:bg-[#c4b590] transition-colors"
-      >
-        <span className="text-2xl">+</span>
-        <span
-          style={{
-            fontFamily: "Lexend Deca, sans-serif",
-            fontSize: "14px",
-            fontWeight: 700,
-            letterSpacing: "0.6px",
-          }}
-        >
-          NOVA O.S
-        </span>
-      </button>
+      {/* Service order creation removed */}
 
       <button
         onClick={onAddClient}
@@ -130,25 +97,7 @@ export function RightSidebar({
       </button>
 
       <nav className="flex flex-col gap-1.5 flex-1">
-        {/* HISTÓRICO button - now functional */}
-        <button
-          onClick={onNavigateToHistory}
-          className="flex items-center justify-center gap-2 py-1.5 px-2 hover:bg-[#7a6345] rounded-lg transition-colors relative"
-        >
-          <FileText className="w-4 h-4 flex-shrink-0" />
-          <span
-            style={{
-              fontFamily: "Lexend Deca, sans-serif",
-              fontSize: "9px",
-              fontWeight: 300,
-              letterSpacing: "0.4px",
-              textAlign: "center",
-            }}
-          >
-            HISTÓRICO
-          </span>
-        </button>
-
+        {/* navigation entries removed (history, warranties, budgets, invoices) */}
         {/* PEÇAS button - now functional */}
         <button
           onClick={onNavigateToParts}
@@ -195,7 +144,7 @@ export function RightSidebar({
           </span>
         </button>
 
-        {/* CLIENTE button - now functional */}
+        {/* CLIENTE button */}
         <button
           onClick={onNavigateToClients}
           className="flex items-center justify-center gap-2 py-1.5 px-2 hover:bg-[#7a6345] rounded-lg transition-colors relative"

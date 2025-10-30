@@ -1,4 +1,4 @@
-
+/**
  * Formats a date string to Brazilian date format (DD/MM/YYYY)
  * @param date - Date string or Date object
  * @returns Formatted date string
@@ -43,4 +43,18 @@ export function isValidDate(date: string | Date): boolean {
   if (!date) return false;
   const dateObj = typeof date === 'string' ? new Date(date) : date;
   return !isNaN(dateObj.getTime());
+}
+
+// Backwards-compatible helpers used by components
+export function formatDate(date: string | Date): string {
+  return formatDateBR(date);
+}
+
+export function formatTime(date: string | Date): string {
+  if (!date) return "";
+  const dateObj = typeof date === "string" ? new Date(date) : date;
+  return dateObj.toLocaleTimeString("pt-BR", {
+    hour: "2-digit",
+    minute: "2-digit",
+  });
 }

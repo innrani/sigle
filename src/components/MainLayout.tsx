@@ -3,24 +3,21 @@
 import { useRef, useState } from "react";
 import { DateTimeDisplay } from "./DateTimeDisplay";
 import { RightSidebar } from "./RightSidebar";
-import type { Appointment, Part, Client, ServiceOrder, Technician } from "../types";
+import type { Appointment, Part, Client, Technician } from "../types";
 
 interface MainLayoutProps {
   currentTime: Date;
   appointments: Appointment[];
-  deliveryOrders: ServiceOrder[];
   parts: Part[];
   clients: Client[];
   activeTechnician?: Technician | null;
   searchQuery: string;
   onSearchChange: (query: string) => void;
   onMoveCard: (dragIndex: number, hoverIndex: number) => void;
-  onToggleDelivered: (serviceOrder: ServiceOrder) => void;
-  onAddServiceOrder: () => void;
+  onAddServiceOrder?: () => void; // deprecated
   onAddClient: () => void;
   onAddAppointment: () => void;
   onAddPart: () => void;
-  onNavigateToHistory: () => void;
   onNavigateToClients: () => void;
   onNavigateToParts: () => void;
   onNavigateToEquipments: () => void;
@@ -30,18 +27,13 @@ interface MainLayoutProps {
 
 export function MainLayout({
   currentTime,
-  appointments,
-  deliveryOrders,
   parts,
   clients,
   activeTechnician,
   searchQuery,
   onSearchChange,
   onMoveCard,
-  onToggleDelivered,
-  onAddServiceOrder,
   onAddClient,
-  onAddAppointment,
   onAddPart,
   onNavigateToHistory,
   onNavigateToClients,
@@ -89,9 +81,7 @@ export function MainLayout({
       <div className="w-[200px] flex-shrink-0 h-screen">
         <RightSidebar 
           activeTechnician={activeTechnician}
-          onAddServiceOrder={onAddServiceOrder}
           onAddClient={onAddClient}
-          onNavigateToHistory={onNavigateToHistory}
           onNavigateToClients={onNavigateToClients}
           onNavigateToParts={onNavigateToParts}
           onNavigateToEquipments={onNavigateToEquipments}
