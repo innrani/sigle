@@ -202,6 +202,14 @@ export const DatabaseService = {
     if (ipcRenderer) return ipcRenderer.invoke('list-all-equipments');
     return readStore<any[]>('equipments', []);
   },
+  updateEquipment: async (equipment_id: number, updates: Partial<Equipment>) => {
+    if (ipcRenderer) return ipcRenderer.invoke('update-equipment', equipment_id, updates);
+    let list = readStore<any[]>('equipments', []);
+    const now = new Date().toISOString();
+    list = list.map((e) => e.id === String(equipment_id) ? { ...e, ...updates, updated_at: now } : e);
+    writeStore('equipments', list);
+    return list.find((e) => e.id === String(equipment_id));
+  },
   deleteEquipment: async (equipment_id: number) => {
     if (ipcRenderer) return ipcRenderer.invoke('delete-equipment', equipment_id);
     let list = readStore<any[]>('equipments', []);

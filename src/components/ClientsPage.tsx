@@ -1,10 +1,11 @@
 // src/components/ClientsPage.tsx
 
-import { ArrowLeft, Search, Plus, Pencil, Trash2, Phone, Mail, MapPin } from "lucide-react";
+import { ArrowLeft, Search, Plus, Pencil, Trash2, Phone, Mail, MapPin, Eye } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner"; // Usar o toast para feedback
 import type { Client } from "../types/index"; // <--- Ajuste o caminho
 import { Button } from "./ui/button";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "./ui/dialog";
 import { DatabaseService } from "../services/database"; // <--- Importa o serviço de DB
 import {
   AlertDialog,
@@ -35,7 +36,7 @@ interface ClientsPageProps {
 
 export function ClientsPage({ onBack, clients, onOpenAddModal, onOpenEditModal, onClientDeleted, showInactive, onToggleShowInactive }: ClientsPageProps) {
   const [searchQuery, setSearchQuery] = useState("");
-
+  const [viewClient, setViewClient] = useState<Client | null>(null);
   const [clientToDeleteId, setClientToDeleteId] = useState<string | null>(null);
 
   // SUBSTITUA a função handleDeleteClient
@@ -185,6 +186,15 @@ export function ClientsPage({ onBack, clients, onOpenAddModal, onOpenEditModal, 
                     {!client.is_active && <span className="text-sm font-normal ml-3">(Inativo)</span>}
                   </h2>
                   <div className="flex gap-2">
+  {/* Botão visualizar */}
+  <button
+    onClick={() => setViewClient(client)}
+    className="p-1 hover:bg-gray-100 rounded-full transition-colors"
+    title="Ver detalhes"
+  >
+    <Eye className="w-4 h-4 text-blue-600" />
+  </button>
+
   {/* Botão editar (sempre visível) */}
   <button
     onClick={() => onOpenEditModal(client)}
@@ -267,6 +277,55 @@ export function ClientsPage({ onBack, clients, onOpenAddModal, onOpenEditModal, 
                 </AlertDialogFooter>
               </AlertDialogContent>
             </AlertDialog>
+
+            {/* Modal de Visualização Detalhada */}
+            <Dialog open={!!viewClient} onOpenChange={() => setViewClient(null)}>
+              <DialogContent className="max-w-2xl">
+                <DialogHeader>
+                  <DialogTitle>Detalhes do Cliente</DialogTitle>
+                </DialogHeader>
+                {viewClient && (
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <label className="text-sm font-semibold text-gray-600">Nome:</label>
+                      <p className="text-base">{viewClient.name}</p>
+                    </div>
+                    <div>
+                      <label className="text-sm font-semibold text-gray-600">Telefone:</label>
+                      <p className="text-base">{viewClient.phone || "Não informado"}</p>
+                    </div>
+                    <div>
+                      <label className="text-sm font-semibold text-gray-600">Email:</label>
+                      <p className="text-base">{viewClient.email || "Não informado"}</p>
+                    </div>
+                    <div>
+                      <label className="text-sm font-semibold text-gray-600">CNPJ:</label>
+                      <p className="text-base">{viewClient.cpf || "Não informado"}</p>
+                    </div>
+                    <div className="col-span-2">
+                      <label className="text-sm font-semibold text-gray-600">Endereço:</label>
+                      <p className="text-base">{viewClient.address || "Não informado"}</p>
+                    </div>
+                    <div>
+                      <label className="text-sm font-semibold text-gray-600">Cidade:</label>
+                      <p className="text-base">{viewClient.city || "Não informado"}</p>
+                    </div>
+                    <div>
+                      <label className="text-sm font-semibold text-gray-600">Estado:</label>
+                      <p className="text-base">{viewClient.state || "Não informado"}</p>
+                    </div>
+                    <div className="col-span-2">
+                      <label className="text-sm font-semibold text-gray-600">Observações:</label>
+                      <p className="text-base">{viewClient.observations || "Nenhuma observação"}</p>
+                    </div>
+                    <div>
+                      <label className="text-sm font-semibold text-gray-600">Status:</label>
+                      <p className="text-base">{viewClient.is_active ? "Ativo" : "Inativo"}</p>
+                    </div>
+                  </div>
+                )}
+              </DialogContent>
+            </Dialog>
           </div>
         )}
       </div>
