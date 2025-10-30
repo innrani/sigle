@@ -81,14 +81,16 @@ export function ClientsPage({ onBack, clients, onOpenAddModal, onOpenEditModal, 
   .filter((client) => {
     const query = searchQuery.toLowerCase();
     return (
+
       (client.name || '').toLowerCase().includes(query) ||
       (client.phone || '').toLowerCase().includes(query) ||
       (client.email || '').toLowerCase().includes(query) ||
       (client.cpf || '').toLowerCase().includes(query)
+
     );
   })
   .sort((a, b) => {
-    // Clientes is_active primeiro
+    // Clientes is_actives primeiro
     if (a.is_active === b.is_active) return 0;
     return a.is_active ? -1 : 1;
   });
