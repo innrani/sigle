@@ -28,9 +28,9 @@ function createWindow() {
 
 // CRÍTICO: Executa quando o Electron está pronto
 app.whenReady().then(() => {
+  // Registre os handlers ANTES de criar a janela para evitar corrida
+  setupDatabaseHandlers()
   createWindow()
-  // CRÍTICO: Chama a função para registrar os canais IPC
-  setupDatabaseHandlers() 
 
   app.on('activate', () => {
     if (BrowserWindow.getAllWindows().length === 0) {
