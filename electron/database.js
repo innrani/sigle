@@ -77,6 +77,29 @@ function initializeDatabase() {
             FOREIGN KEY (payment_method_id) REFERENCES payment_methods(method_id)
         );
 
+        CREATE TABLE IF NOT EXISTS parts (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            type TEXT,
+            name TEXT NOT NULL,
+            description TEXT,
+            quantity INTEGER NOT NULL DEFAULT 0,
+            price REAL,
+            unit TEXT,
+            is_active INTEGER DEFAULT 1,
+            created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+            updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
+        );
+
+        CREATE TABLE IF NOT EXISTS technicians (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            name TEXT NOT NULL,
+            phone TEXT,
+            specialty TEXT,
+            is_active INTEGER DEFAULT 1,
+            created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+            updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
+        );
+
         CREATE TABLE IF NOT EXISTS service_parts (
             order_number INTEGER,
             part_serial_number TEXT,

@@ -71,7 +71,9 @@
             "build": "vite build",
             "electron:dev": "node electron/start.js",
             "electron:build": "vite build && electron-builder",
-            "electron:preview": "vite build && electron electron/main.js"
+            "electron:preview": "vite build && electron electron/main.js",
+            "electron:rebuild": "electron-rebuild -f -w better-sqlite3",
+            "postinstall": "electron-builder install-app-deps"
       },
       "build": {
             "appId": "com.sigle.app",

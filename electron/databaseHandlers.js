@@ -236,9 +236,153 @@ ipcMain.handle('reactivate-equipment', async (event, equipment_id) => {
     }
 });
 
+// 6. Atualizar equipamento
+ipcMain.handle('update-equipment', async (event, equipment_id, updates) => {
+    try {
+        const query = `
+            UPDATE equipment 
+            SET device_type = @device,
+                brand = @brand,
+                model = @model,
+                serial_number = @serialNumber,
+                accessories = @notes,
+                updated_at = CURRENT_TIMESTAMP
+            WHERE equipment_id = @id
+        `;
+        db.prepare(query).run({ ...updates, id: equipment_id });
+        
+        const updatedEquipment = db.prepare('SELECT * FROM equipment WHERE equipment_id = ?').get(equipment_id);
+        return updatedEquipment;
+    } catch (error) {
+        console.error("Erro ao atualizar equipamento:", error);
+        throw new Error("Falha ao atualizar equipamento no banco de dados.");
+    }
+});
+
+    // ------------------------------------
+    // Handlers para Peças
+    // ------------------------------------
+
+    ipcMain.handle('create-part', async (event, part) => {
+        try {
+            const query = `
+                INSERT INTO parts (type, name, description, quantity, price, unit, is_active)
+                VALUES (@type, @name, @description, @quantity, @price, @unit, 1)
+            `;
+            const result = db.prepare(query).run(part);
+            const newPart = db.prepare('SELECT * FROM parts WHERE id = ?').get(result.lastInsertRowid);
+            return newPart;
+        } catch (error) {
+            console.error("Erro ao criar peça:", error);
+            throw new Error("Falha ao cadastrar peça no banco de dados.");
+        }
+    });
+
+    ipcMain.handle('list-parts', async () => {
+        try {
+            const query = 'SELECT * FROM parts WHERE is_active = 1 ORDER BY name';
+            return db.prepare(query).all();
+        } catch (error) {
+            console.error("Erro ao listar peças:", error);
+            throw new Error("Falha ao buscar peças no banco de dados.");
+        }
+    });
+
+    ipcMain.handle('update-part', async (event, part) => {
+        try {
+            const query = `
+                UPDATE parts 
+                SET type = @type,
+                    name = @name,
+                    description = @description,
+                    quantity = @quantity,
+                    price = @price,
+                    unit = @unit,
+                    updated_at = CURRENT_TIMESTAMP
+                WHERE id = @id
+            `;
+            db.prepare(query).run(part);
+            const updatedPart = db.prepare('SELECT * FROM parts WHERE id = ?').get(part.id);
+            return updatedPart;
+        } catch (error) {
+            console.error("Erro ao atualizar peça:", error);
+            throw new Error("Falha ao atualizar peça no banco de dados.");
+        }
+    });
+
+    ipcMain.handle('delete-part', async (event, id) => {
+        try {
+            // Soft delete
+            const query = 'UPDATE parts SET is_active = 0, updated_at = CURRENT_TIMESTAMP WHERE id = ?';
+            db.prepare(query).run(id);
+            return { success: true, message: 'Peça inativada com sucesso.' };
+        } catch (error) {
+            console.error("Erro ao deletar peça:", error);
+            throw new Error("Falha ao deletar peça no banco de dados.");
+        }
+    });
+
+    // ------------------------------------
+    // Handlers para Técnicos
+    // ------------------------------------
+
+    ipcMain.handle('create-technician', async (event, technician) => {
+        try {
+            const query = `
+                INSERT INTO technicians (name, phone, specialty, is_active)
+                VALUES (@name, @phone, @specialty, 1)
+            `;
+            const result = db.prepare(query).run(technician);
+            const newTechnician = db.prepare('SELECT * FROM technicians WHERE id = ?').get(result.lastInsertRowid);
+            return newTechnician;
+        } catch (error) {
+            console.error("Erro ao criar técnico:", error);
+            throw new Error("Falha ao cadastrar técnico no banco de dados.");
+        }
+    });
+
+    ipcMain.handle('list-technicians', async () => {
+        try {
+            const query = 'SELECT * FROM technicians WHERE is_active = 1 ORDER BY name';
+            return db.prepare(query).all();
+        } catch (error) {
+            console.error("Erro ao listar técnicos:", error);
+            throw new Error("Falha ao buscar técnicos no banco de dados.");
+        }
+    });
+
+    ipcMain.handle('update-technician', async (event, technician) => {
+        try {
+            const query = `
+                UPDATE technicians 
+                SET name = @name,
+                    phone = @phone,
+                    specialty = @specialty,
+                    updated_at = CURRENT_TIMESTAMP
+                WHERE id = @id
+            `;
+            db.prepare(query).run(technician);
+            const updatedTechnician = db.prepare('SELECT * FROM technicians WHERE id = ?').get(technician.id);
+            return updatedTechnician;
+        } catch (error) {
+            console.error("Erro ao atualizar técnico:", error);
+            throw new Error("Falha ao atualizar técnico no banco de dados.");
+        }
+    });
+
+    ipcMain.handle('delete-technician', async (event, id) => {
+        try {
+            // Soft delete
+            const query = 'UPDATE technicians SET is_active = 0, updated_at = CURRENT_TIMESTAMP WHERE id = ?';
+            db.prepare(query).run(id);
+            return { success: true, message: 'Técnico inativado com sucesso.' };
+        } catch (error) {
+            console.error("Erro ao deletar técnico:", error);
+            throw new Error("Falha ao deletar técnico no banco de dados.");
+        }
+    });
+
 }
-
-
 
 // Exporta a função para que main.js possa chamá-la.
 module.exports = { setupDatabaseHandlers };

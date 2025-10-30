@@ -26,3 +26,9 @@ Thumbs.db
 
 # Database file (VERY IMPORTANT! Não queremos o banco de dados local no Git)
 database.db
+*.db
+*.db-shm
+*.db-wal
+
+# Electron dist
+dist_electron/
