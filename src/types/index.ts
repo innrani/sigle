@@ -47,6 +47,8 @@ export interface Equipment {
   serialNumber?: string;
   notes?: string;
   isActive?: boolean;
+  // lista de ids de peças/acessórios associados a este equipamento
+  accessories?: string[];
   created_at?: string;
   updated_at?: string;
 }

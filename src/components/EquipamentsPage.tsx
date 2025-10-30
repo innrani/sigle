@@ -21,6 +21,7 @@ export function EquipmentsPage({ onBack }: EquipmentsPageProps) {
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [viewEquipment, setViewEquipment] = useState<Equipment | null>(null);
   const [editEquipment, setEditEquipment] = useState<Equipment | null>(null);
+  const [parts, setParts] = useState<any[]>([]);
 
   const loadEquipments = async () => {
     try {
@@ -38,6 +39,13 @@ export function EquipmentsPage({ onBack }: EquipmentsPageProps) {
 
   useEffect(() => {
     loadEquipments();
+    // load parts for accessories display
+    DatabaseService.listParts()
+      .then((list) => setParts(list || []))
+      .catch((err) => {
+        console.error('Erro ao carregar peças:', err);
+        setParts([]);
+      });
   }, []);
 
   useEffect(() => {
@@ -184,6 +192,20 @@ export function EquipmentsPage({ onBack }: EquipmentsPageProps) {
                 <p className="text-sm">{viewEquipment.notes || "Nenhuma observação"}</p>
               </div>
               <div>
+                <label className="text-sm font-semibold">Acessórios:</label>
+                <div className="text-sm">
+                  {viewEquipment.accessories && viewEquipment.accessories.length > 0 ? (
+                    <ul className="list-disc ml-5">
+                      {viewEquipment.accessories.map((aid) => (
+                        <li key={aid}>{parts.find((p) => p.id === aid)?.name ?? aid}</li>
+                      ))}
+                    </ul>
+                  ) : (
+                    <p className="text-sm">Nenhum acessório</p>
+                  )}
+                </div>
+              </div>
+              <div>
                 <label className="text-sm font-semibold">Status:</label>
                 <p className="text-sm">{viewEquipment.isActive ? "Ativo" : "Inativo"}</p>
               </div>
@@ -234,6 +256,32 @@ export function EquipmentsPage({ onBack }: EquipmentsPageProps) {
                   value={editEquipment.notes || ""}
                   onChange={(e) => setEditEquipment({ ...editEquipment, notes: e.target.value })}
                 />
+              </div>
+
+              {/* Acessórios: lista de peças com checkboxes */}
+              <div>
+                <label className="text-sm font-semibold block mb-2">Acessórios</label>
+                <div className="grid grid-cols-1 gap-2 max-h-40 overflow-auto border rounded p-2">
+                  {parts.length === 0 ? (
+                    <div className="text-sm text-gray-500">Nenhuma peça disponível</div>
+                  ) : (
+                    parts.map((p) => (
+                      <label key={p.id} className="flex items-center gap-2 text-sm">
+                        <input
+                          type="checkbox"
+                          checked={(editEquipment.accessories || []).includes(p.id)}
+                          onChange={(e) => {
+                            const checked = e.target.checked;
+                            const current = editEquipment.accessories || [];
+                            const next = checked ? [...current, p.id] : current.filter((id) => id !== p.id);
+                            setEditEquipment({ ...editEquipment, accessories: next });
+                          }}
+                        />
+                        <span>{p.name} {p.type ? `(${p.type})` : ""}</span>
+                      </label>
+                    ))
+                  )}
+                </div>
               </div>
               <div className="flex justify-end gap-2">
                 <Button variant="outline" onClick={() => setEditEquipment(null)}>

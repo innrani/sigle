@@ -143,14 +143,33 @@ function setupDatabaseHandlers() {
 // 1. Adicionar novo equipamento
 ipcMain.handle('add-equipment', async (event, equipment) => {
     try {
+        // Aceita tanto camelCase (frontend) quanto snake_case
+        const serial_number = equipment.serialNumber ?? equipment.serial_number ?? '';
+        const device_type = equipment.device ?? equipment.device_type ?? '';
+        const brand = equipment.brand ?? '';
+        const model = equipment.model ?? '';
+        const accessories = equipment.accessories ? JSON.stringify(equipment.accessories) : JSON.stringify([]);
+
         const query = `
             INSERT INTO equipment (serial_number, device_type, brand, model, accessories, is_active)
             VALUES (@serial_number, @device_type, @brand, @model, @accessories, 1)
         `;
-        const result = db.prepare(query).run(equipment); 
-        
+        const result = db.prepare(query).run({ serial_number, device_type, brand, model, accessories });
+
         // Retorna o equipamento completo usando o ID gerado (equipment_id)
-        const newEquipment = db.prepare('SELECT * FROM equipment WHERE equipment_id = ?').get(result.lastInsertRowid);
+        const row = db.prepare('SELECT * FROM equipment WHERE equipment_id = ?').get(result.lastInsertRowid);
+        const parsedAccessories = row && row.accessories ? (function(){ try { return JSON.parse(row.accessories); } catch(e){ return []; } })() : [];
+        const newEquipment = row ? {
+            id: String(row.equipment_id),
+            device: row.device_type,
+            brand: row.brand,
+            model: row.model,
+            serialNumber: row.serial_number,
+            accessories: parsedAccessories,
+            isActive: Boolean(row.is_active),
+            created_at: row.created_at,
+            updated_at: row.updated_at
+        } : null;
         return newEquipment;
 
     } catch (error) {
@@ -167,7 +186,19 @@ ipcMain.handle('add-equipment', async (event, equipment) => {
 ipcMain.handle('list-active-equipments', async () => {
     try {
         const query = 'SELECT * FROM equipment WHERE is_active = 1 ORDER BY model';
-        return db.prepare(query).all();
+        const rows = db.prepare(query).all();
+        // map DB columns to frontend fields and parse accessories
+        return rows.map(r => ({
+            id: String(r.equipment_id),
+            device: r.device_type,
+            brand: r.brand,
+            model: r.model,
+            serialNumber: r.serial_number,
+            accessories: r.accessories ? (function(){ try { return JSON.parse(r.accessories); } catch(e){ return []; } })() : [],
+            isActive: Boolean(r.is_active),
+            created_at: r.created_at,
+            updated_at: r.updated_at
+        }));
     } catch (error) {
         console.error("Erro ao listar equipamentos ativos:", error);
         throw new Error("Falha ao buscar equipamentos ativos no banco de dados.");
@@ -179,7 +210,18 @@ ipcMain.handle('list-active-equipments', async () => {
 ipcMain.handle('list-all-equipments', async () => {
     try {
         const query = 'SELECT * FROM equipment ORDER BY model';
-        return db.prepare(query).all();
+        const rows = db.prepare(query).all();
+        return rows.map(r => ({
+            id: String(r.equipment_id),
+            device: r.device_type,
+            brand: r.brand,
+            model: r.model,
+            serialNumber: r.serial_number,
+            accessories: r.accessories ? (function(){ try { return JSON.parse(r.accessories); } catch(e){ return []; } })() : [],
+            isActive: Boolean(r.is_active),
+            created_at: r.created_at,
+            updated_at: r.updated_at
+        }));
     } catch (error) {
         console.error("Erro ao listar todos os equipamentos:", error);
         throw new Error("Falha ao buscar todos os equipamentos no banco de dados.");
@@ -191,17 +233,15 @@ ipcMain.handle('list-all-equipments', async () => {
 ipcMain.handle('delete-equipment', async (event, equipment_id) => {
     try {
         // 1. Obtém o serial_number, que é a chave de ligação com a tabela 'servico'
-        const equipment = db.prepare('SELECT serial_number FROM equipment WHERE equipment_id = ?').get(equipment_id);
-        
+        const equipment = db.prepare('SELECT * FROM equipment WHERE equipment_id = ?').get(equipment_id);
+
         if (!equipment) {
             throw new Error("Equipamento não encontrado para exclusão.");
         }
-        
-        const serialNumber = equipment.serial_number;
 
-        // 2. Verifica se o equipamento tem serviços/OS associados
+        // 2. Verifica se o equipamento tem serviços/OS associados (usa equipment_id como FK)
         const serviceCountQuery = 'SELECT COUNT(*) AS count FROM service_orders WHERE equipment_id = ?';
-        const { count: serviceCount } = db.prepare(serviceCountQuery).get(serialNumber);
+        const { count: serviceCount } = db.prepare(serviceCountQuery).get(equipment_id);
 
         const isSoftDelete = serviceCount > 0;
 
@@ -239,20 +279,39 @@ ipcMain.handle('reactivate-equipment', async (event, equipment_id) => {
 // 6. Atualizar equipamento
 ipcMain.handle('update-equipment', async (event, equipment_id, updates) => {
     try {
+        // Aceita camelCase do frontend. Converte accessories para JSON string.
+        const serial_number = updates.serialNumber ?? updates.serial_number ?? updates.serial_number ?? '';
+        const device_type = updates.device ?? updates.device_type ?? '';
+        const brand = updates.brand ?? '';
+        const model = updates.model ?? '';
+        const accessories = updates.accessories ? JSON.stringify(updates.accessories) : JSON.stringify([]);
+
         const query = `
             UPDATE equipment 
-            SET device_type = @device,
+            SET device_type = @device_type,
                 brand = @brand,
                 model = @model,
-                serial_number = @serialNumber,
-                accessories = @notes,
+                serial_number = @serial_number,
+                accessories = @accessories,
                 updated_at = CURRENT_TIMESTAMP
             WHERE equipment_id = @id
         `;
-        db.prepare(query).run({ ...updates, id: equipment_id });
-        
-        const updatedEquipment = db.prepare('SELECT * FROM equipment WHERE equipment_id = ?').get(equipment_id);
-        return updatedEquipment;
+        db.prepare(query).run({ device_type, brand, model, serial_number, accessories, id: equipment_id });
+
+        const row = db.prepare('SELECT * FROM equipment WHERE equipment_id = ?').get(equipment_id);
+        if (!row) return null;
+        const parsed = row.accessories ? (function(){ try { return JSON.parse(row.accessories); } catch(e){ return []; } })() : [];
+        return {
+            id: String(row.equipment_id),
+            device: row.device_type,
+            brand: row.brand,
+            model: row.model,
+            serialNumber: row.serial_number,
+            accessories: parsed,
+            isActive: Boolean(row.is_active),
+            created_at: row.created_at,
+            updated_at: row.updated_at
+        };
     } catch (error) {
         console.error("Erro ao atualizar equipamento:", error);
         throw new Error("Falha ao atualizar equipamento no banco de dados.");

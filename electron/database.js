@@ -112,6 +112,20 @@ function initializeDatabase() {
     `;
 
     db.exec(createTable);
+    // Migration: garante que a coluna 'accessories' exista na tabela 'equipment' (para bancos antigos)
+    try {
+        const cols = db.prepare("PRAGMA table_info(equipment)").all();
+        const hasAccessories = cols.some(c => c.name === 'accessories');
+        if (!hasAccessories) {
+            // Adiciona a coluna como TEXT que armazenará um JSON array (ex: '[]')
+            db.prepare("ALTER TABLE equipment ADD COLUMN accessories TEXT DEFAULT '[]'").run();
+            // Atualiza linhas existentes para ter o valor padrão
+            db.prepare("UPDATE equipment SET accessories = '[]' WHERE accessories IS NULL").run();
+            console.log('Migrated: added accessories column to equipment table');
+        }
+    } catch (e) {
+        console.warn('Erro ao checar/atualizar coluna accessories:', e);
+    }
     
     // Configura a instância e retorna
     dbInstance = db;
