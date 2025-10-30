@@ -220,7 +220,7 @@ ipcMain.handle('delete-equipment', async (event, equipment_id) => {
 
         // 2. Verifica se o equipamento tem serviços/OS associados
         const serviceCountQuery = 'SELECT COUNT(*) AS count FROM service_orders WHERE equipment_id = ?';
-        const { count: serviceCount } = db.prepare(serviceCountQuery).get(serialNumber);
+        const { count: serviceCount } = db.prepare(serviceCountQuery).get(equipment_id);
 
         const isSoftDelete = serviceCount > 0;
 
@@ -258,17 +258,26 @@ ipcMain.handle('reactivate-equipment', async (event, equipment_id) => {
 // 6. Atualizar equipamento
 ipcMain.handle('update-equipment', async (event, equipment_id, updates) => {
     try {
+        // Mapeia campos do front-end para colunas do DB
+        const payload = {
+            id: equipment_id,
+            device_type: updates.device,
+            brand: updates.brand,
+            model: updates.model,
+            serial_number: updates.serialNumber,
+            accessories: updates.notes ?? null,
+        };
         const query = `
             UPDATE equipment 
-            SET device_type = @device,
+            SET device_type = @device_type,
                 brand = @brand,
                 model = @model,
-                serial_number = @serialNumber,
-                accessories = @notes,
+                serial_number = @serial_number,
+                accessories = @accessories,
                 updated_at = CURRENT_TIMESTAMP
             WHERE equipment_id = @id
         `;
-        db.prepare(query).run({ ...updates, id: equipment_id });
+        db.prepare(query).run(payload);
         
         const updatedEquipment = db.prepare('SELECT * FROM equipment WHERE equipment_id = ?').get(equipment_id);
         return updatedEquipment;
