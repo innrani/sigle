@@ -199,21 +199,13 @@ export default function App() {
         ) : (
           <MainLayout
             currentTime={currentTime}
-            appointments={appointments}
-            parts={parts}
             clients={activeClients}
             activeTechnician={activeTechnician}
-            searchQuery={searchQuery}
-            onSearchChange={setSearchQuery}
-            onMoveCard={moveCard}
-            onAddClient={() => setIsClientModalOpen(true)}
-            onAddAppointment={() => {}}
-            onAddPart={() => setIsPartModalOpen(true)}
+            onOpenAddModal={() => setIsClientModalOpen(true)}
             onNavigateToClients={() => setCurrentPage("clients")}
             onNavigateToParts={() => setCurrentPage("parts")}
             onNavigateToEquipments={() => setCurrentPage("equipments")}
             onManageTechnicians={() => setIsTechniciansModalOpen(true)}
-            onChangeTechnician={() => setIsTechnicianSelectionModalOpen(true)}
           />
         )}
 
