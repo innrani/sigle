@@ -1,9 +1,10 @@
 import { useEffect, useState } from "react";
-import { ArrowLeft, Trash2, RotateCcw } from "lucide-react";
+import { ArrowLeft, Trash2, RotateCcw, Plus } from "lucide-react";
 import { Button } from "./ui/button";
 import { Table, TableBody, TableRow, TableHead, TableHeader, TableCell } from "./ui/table";
 import { DatabaseService } from "../services/database";
 import { toast } from "sonner";
+import { AddEquipmentModal } from "./AddEquipmentModal";
 import type { Equipment } from "../types";
 
 interface EquipmentsPageProps {
@@ -13,6 +14,7 @@ interface EquipmentsPageProps {
 export function EquipmentsPage({ onBack }: EquipmentsPageProps) {
   const [equipments, setEquipments] = useState<Equipment[]>([]);
   const [isLoading, setIsLoading] = useState(false);
+  const [isAddModalOpen, setIsAddModalOpen] = useState(false);
 
   const loadEquipments = async () => {
     try {
@@ -66,6 +68,9 @@ export function EquipmentsPage({ onBack }: EquipmentsPageProps) {
           </Button>
           <h2 className="text-xl font-semibold">Equipamentos</h2>
         </div>
+        <Button onClick={() => setIsAddModalOpen(true)}>
+          <Plus className="w-4 h-4 mr-2" /> Adicionar Equipamento
+        </Button>
       </div>
 
       {isLoading ? (
@@ -108,6 +113,12 @@ export function EquipmentsPage({ onBack }: EquipmentsPageProps) {
           </TableBody>
         </Table>
       )}
+
+      <AddEquipmentModal
+        open={isAddModalOpen}
+        onClose={() => setIsAddModalOpen(false)}
+        onSuccess={loadEquipments}
+      />
     </div>
   );
 }

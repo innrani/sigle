@@ -11,11 +11,12 @@ import { z } from "zod";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 
+// Keep schema as string-based inputs so react-hook-form types match the form controls.
 const partSchema = z.object({
   name: z.string().min(1, "Nome é obrigatório"),
   description: z.string().optional(),
-  quantity: z.string().transform(Number).refine((n) => n >= 0, "Quantidade deve ser maior ou igual a 0"),
-  price: z.string().transform((val) => parseFloat(val.replace(",", "."))).refine((n) => n >= 0, "Preço deve ser maior ou igual a 0"),
+  quantity: z.string().regex(/^\d+(?:[.,]\d+)?$/, "Quantidade deve ser um número"),
+  price: z.string().regex(/^\d+(?:[.,]\d+)?$/, "Preço deve ser um número"),
 });
 
 type PartFormData = z.infer<typeof partSchema>;
@@ -42,11 +43,11 @@ export function AddPartModal({ open, onOpenChange, onAddPart }: AddPartModalProp
   async function onSubmit(data: PartFormData) {
     try {
       setIsSubmitting(true);
-      
+      // Convert string inputs to the expected numeric types
       const part = {
         ...data,
-        quantity: Number(data.quantity),
-        price: Number(data.price),
+        quantity: Number(String(data.quantity).replace(',', '.')),
+        price: Number(String(data.price).replace(',', '.')),
       };
 
       await DatabaseService.createPart(part);
@@ -74,7 +75,7 @@ export function AddPartModal({ open, onOpenChange, onAddPart }: AddPartModalProp
             <FormField
               control={form.control}
               name="name"
-              render={({ field }) => (
+              render={({ field }: any) => (
                 <FormItem>
                   <FormLabel>Nome</FormLabel>
                   <FormControl>
@@ -87,7 +88,7 @@ export function AddPartModal({ open, onOpenChange, onAddPart }: AddPartModalProp
             <FormField
               control={form.control}
               name="description"
-              render={({ field }) => (
+              render={({ field }: any) => (
                 <FormItem>
                   <FormLabel>Descrição</FormLabel>
                   <FormControl>
@@ -100,7 +101,7 @@ export function AddPartModal({ open, onOpenChange, onAddPart }: AddPartModalProp
             <FormField
               control={form.control}
               name="quantity"
-              render={({ field }) => (
+              render={({ field }: any) => (
                 <FormItem>
                   <FormLabel>Quantidade</FormLabel>
                   <FormControl>
@@ -118,7 +119,7 @@ export function AddPartModal({ open, onOpenChange, onAddPart }: AddPartModalProp
             <FormField
               control={form.control}
               name="price"
-              render={({ field }) => (
+              render={({ field }: any) => (
                 <FormItem>
                   <FormLabel>Preço</FormLabel>
                   <FormControl>
