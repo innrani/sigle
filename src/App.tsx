@@ -9,34 +9,23 @@ import { toast } from "sonner";
 import type { Client, Appointment, Part, ServiceOrder, Technician, PageType } from "./types";
 
 // Constants
-import { STORAGE_KEYS, initialClients, initialAppointments, initialParts } from "./lib/constants";
+import { initialClients, initialAppointments, initialParts } from "../lib/constants";
 
 
-import { useClock } from "./hooks/useClock";
+import { useClock } from "../hooks/useClock";
 
 // Components - Modals
-import { AddServiceOrderModal } from "./components/AddServiceOrderModal";
 import { AddClientModal } from "./components/AddClientModal";
-//import { AddAppointmentModal } from "./components/AddAppointmentModal";
 import { AddPartModal } from "./components/AddPartModal";
 import { EditClientModal } from "./components/EditClientModal";
 import { EditPartModal } from "./components/EditPartModal";
 import { TechniciansManagementModal } from "./components/TechniciansManagementModal";
-import { TechnicianSelectionModal } from "./components/TechnicianSelectionModal";
-// import { FirstTimeSetupModal } from "./components/FirstTimeSetupModal";
-import { ServiceOrderDetailModal } from "./components/ServiceOrderDetailModal";
-import { ServiceOrderCompletionModal } from "./components/ServiceOrderCompletionModal";
 
 // Components - Pages
 import { MainLayout } from "./components/MainLayout";
 import { HistoryPage } from "./components/HistoryPage";
 import { ClientsPage } from "./components/ClientsPage";
 import { PartsPage } from "./components/PartsPage";
-//import { WarrantiesPage } from "./components/WarrantiesPage";
-//import { BudgetsPage } from "./components/BudgetsPage";
-//import { InvoicesPage } from "./components/InvoicesPage";
-//import { EquipmentsPage } from "./components/EquipmentsPage";
-//import { ServiceOrderPrintPage } from "./components/ServiceOrderPrintPage";
 
 // UI Components
 import { Toaster } from "./components/ui/sonner";
@@ -44,18 +33,17 @@ import { Toaster } from "./components/ui/sonner";
 export default function App() {
   // SQL AQUI 
   const currentTime = useClock();
-  const [clients, setClients] = useLocalStorage<Client[]>(STORAGE_KEYS.CLIENTS, initialClients);
-  const [parts, setParts] = useLocalStorage<Part[]>(STORAGE_KEYS.PARTS, initialParts);
-  const [appointments, setAppointments] = useLocalStorage<Appointment[]>(STORAGE_KEYS.APPOINTMENTS, initialAppointments);
-  const [serviceOrders, setServiceOrders] = useLocalStorage<ServiceOrder[]>(STORAGE_KEYS.SERVICE_ORDERS, []);
-  const [technicians, setTechnicians] = useLocalStorage<Technician[]>(STORAGE_KEYS.TECHNICIANS, []);
-  const [isSetupComplete, setIsSetupComplete] = useLocalStorage<boolean>(STORAGE_KEYS.SETUP_COMPLETE, false);
-  const [activeTechnicianId, setActiveTechnicianId] = useLocalStorage<string | null>(STORAGE_KEYS.ACTIVE_TECHNICIAN, null);
+  const [clients, setClients] = useState<Client[]>(initialClients);
+  const [parts, setParts] = useState<Part[]>(initialParts);
+  const [appointments, setAppointments] = useState<Appointment[]>(initialAppointments);
+  const [serviceOrders, setServiceOrders] = useState<ServiceOrder[]>([]);
+  const [technicians, setTechnicians] = useState<Technician[]>([]);
+  const [isSetupComplete, setIsSetupComplete] = useState<boolean>(false);
+  const [activeTechnicianId, setActiveTechnicianId] = useState<string | null>(null);
   
   // Page navigation state
   const [currentPage, setCurrentPage] = useState<PageType>("main");
   
-  // Current service order for printing
   const [currentServiceOrder, setCurrentServiceOrder] = useState<ServiceOrder | null>(null);
   
   // Pre-selected client for O.S creation
@@ -177,7 +165,6 @@ export default function App() {
     }
   };
 
-  // Handler to open service order modal with validation
   const handleOpenServiceOrderModal = () => {
     if (clients.length === 0) {
       toast.error("Cadastre um cliente primeiro", {
@@ -205,14 +192,12 @@ export default function App() {
     setIsServiceOrderModalOpen(true);
   };
 
-  // Handler to create service order
   const handleCreateServiceOrder = (serviceOrder: ServiceOrder) => {
     setCurrentServiceOrder(serviceOrder);
     setCurrentPage("print-os");
     toast.success("O.S criada com sucesso!");
   };
 
-  // Handler to save service order to history
   const handleSaveToHistory = (status: ServiceOrder["status"]) => {
     if (currentServiceOrder) {
       const updatedServiceOrder = { ...currentServiceOrder, status };
@@ -223,26 +208,22 @@ export default function App() {
     }
   };
 
-  // Handler to select service order from history
   const handleSelectServiceOrder = (serviceOrder: ServiceOrder) => {
     setSelectedServiceOrder(serviceOrder);
     setIsServiceOrderDetailModalOpen(true);
   };
 
-  // Handler to update service order
   const handleUpdateServiceOrder = (updatedServiceOrder: ServiceOrder) => {
     setServiceOrders(serviceOrders.map(so => so.id === updatedServiceOrder.id ? updatedServiceOrder : so));
     toast.success("O.S atualizada com sucesso!");
   };
 
-  // Handler to mark service order as ready (opens completion modal)
   const handleMarkAsReady = (serviceOrder: ServiceOrder) => {
     setSelectedServiceOrder(serviceOrder);
     setIsServiceOrderDetailModalOpen(false);
     setIsServiceOrderCompletionModalOpen(true);
   };
 
-  // Handler to complete service order
   const handleCompleteServiceOrder = (completedServiceOrder: ServiceOrder) => {
     setServiceOrders(serviceOrders.map(so => so.id === completedServiceOrder.id ? completedServiceOrder : so));
     setIsServiceOrderCompletionModalOpen(false);
@@ -251,7 +232,6 @@ export default function App() {
     });
   };
 
-  // Handler to complete and print service order
   const handlePrintAndCompleteServiceOrder = (completedServiceOrder: ServiceOrder) => {
     setServiceOrders(serviceOrders.map(so => so.id === completedServiceOrder.id ? completedServiceOrder : so));
     setIsServiceOrderCompletionModalOpen(false);
@@ -334,7 +314,7 @@ export default function App() {
 
   // Handler to toggle delivery status
   const handleToggleDelivered = (serviceOrder: ServiceOrder) => {
-    const newStatus = serviceOrder.status === "completed" ? "in-progress" : "completed";
+    const newStatus: ServiceOrder["status"] = serviceOrder.status === "completed" ? "in-progress" : "completed";
     const updatedServiceOrder = {
       ...serviceOrder,
       status: newStatus,
@@ -394,9 +374,13 @@ export default function App() {
           <ClientsPage 
             onBack={() => setCurrentPage("main")}
             clients={clients}
-            onAddClient={() => setIsClientModalOpen(true)}
-            onEditClient={handleEditClient}
-            onDeleteClient={handleDeleteClient}
+            onOpenAddModal={() => setIsClientModalOpen(true)}
+            onOpenEditModal={handleEditClient}
+            onClientDeleted={handleDeleteClient}
+            showInactive={false}
+            onToggleShowInactive={() => {}}
+            onClientReactivated={() => {}}
+            isLoading={false}
           />
         ) : currentPage === "parts" ? (
           <PartsPage
@@ -405,28 +389,6 @@ export default function App() {
             onAddPart={() => setIsPartModalOpen(true)}
             onEditPart={handleEditPart}
             onDeletePart={handleDeletePart}
-          />
-        ) : currentPage === "warranties" ? (
-          <WarrantiesPage 
-            onBack={() => setCurrentPage("main")}
-            serviceOrders={serviceOrders}
-            onSelectServiceOrder={handleSelectServiceOrder}
-          />
-        ) : currentPage === "budgets" ? (
-          <BudgetsPage onBack={() => setCurrentPage("main")} />
-        ) : currentPage === "invoices" ? (
-          <InvoicesPage onBack={() => setCurrentPage("main")} />
-        ) : currentPage === "equipments" ? (
-          <EquipmentsPage 
-            onBack={() => setCurrentPage("main")}
-            serviceOrders={serviceOrders}
-            onViewServiceOrder={handleSelectServiceOrder}
-          />
-        ) : currentPage === "print-os" && currentServiceOrder ? (
-          <ServiceOrderPrintPage
-            serviceOrder={currentServiceOrder}
-            onBack={() => setCurrentPage("main")}
-            onSaveToHistory={handleSaveToHistory}
           />
         ) : (
           <MainLayout
@@ -447,9 +409,6 @@ export default function App() {
             onNavigateToHistory={() => setCurrentPage("history")}
             onNavigateToClients={() => setCurrentPage("clients")}
             onNavigateToParts={() => setCurrentPage("parts")}
-            onNavigateToWarranties={() => setCurrentPage("warranties")}
-            onNavigateToBudgets={() => setCurrentPage("budgets")}
-            onNavigateToInvoices={() => setCurrentPage("invoices")}
             onNavigateToEquipments={() => setCurrentPage("equipments")}
             onManageTechnicians={() => setIsTechniciansModalOpen(true)}
             onChangeTechnician={() => setIsTechnicianSelectionModalOpen(true)}
@@ -457,34 +416,10 @@ export default function App() {
         )}
 
         {/* Modals */}
-        <FirstTimeSetupModal 
-          open={!isSetupComplete}
-          onComplete={handleCompleteSetup}
-        />
-        <TechnicianSelectionModal
-          open={needsTechnicianSelection || isTechnicianSelectionModalOpen}
-          technicians={technicians}
-          onSelectTechnician={handleSelectTechnician}
-          onAddNewTechnician={handleAddTechnicianFromSelection}
-        />
-        <AddServiceOrderModal 
-          open={isServiceOrderModalOpen} 
-          onOpenChange={setIsServiceOrderModalOpen}
-          clients={clients}
-          technicians={technicians}
-          activeTechnicianId={activeTechnicianId}
-          onCreateServiceOrder={handleCreateServiceOrder}
-          preSelectedClient={preSelectedClient}
-        />
         <AddClientModal 
           open={isClientModalOpen} 
           onOpenChange={setIsClientModalOpen}
-          onAddClient={handleAddClient}
-        />
-        <AddAppointmentModal 
-          open={isAppointmentModalOpen} 
-          onOpenChange={setIsAppointmentModalOpen}
-          onAddAppointment={handleAddAppointment}
+          onClientAdded={handleAddClient}
         />
         <AddPartModal 
           open={isPartModalOpen} 
@@ -495,7 +430,7 @@ export default function App() {
           open={isEditClientModalOpen}
           onOpenChange={setIsEditClientModalOpen}
           client={clientToEdit}
-          onEditClient={handleUpdateClient}
+          onClientUpdated={handleUpdateClient}
         />
         <EditPartModal
           open={isEditPartModalOpen}
@@ -510,22 +445,6 @@ export default function App() {
           onAddTechnician={handleAddTechnician}
           onUpdateTechnician={handleUpdateTechnician}
           onDeleteTechnician={handleDeleteTechnician}
-        />
-        <ServiceOrderDetailModal
-          open={isServiceOrderDetailModalOpen}
-          onOpenChange={setIsServiceOrderDetailModalOpen}
-          serviceOrder={selectedServiceOrder}
-          clients={clients}
-          technicians={technicians}
-          onUpdateServiceOrder={handleUpdateServiceOrder}
-          onMarkAsReady={handleMarkAsReady}
-        />
-        <ServiceOrderCompletionModal
-          open={isServiceOrderCompletionModalOpen}
-          onOpenChange={setIsServiceOrderCompletionModalOpen}
-          serviceOrder={selectedServiceOrder}
-          onComplete={handleCompleteServiceOrder}
-          onPrintAndComplete={handlePrintAndCompleteServiceOrder}
         />
       </div>
     </DndProvider>

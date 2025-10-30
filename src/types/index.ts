@@ -6,7 +6,7 @@ export interface Client {
   name: string;
   phone: string;
   email: string | null; // Tipagem para NULL
-  cpf: null;
+  cpf: string | null;
   address: string | null;
   city: string | null;
   state: string | null;  
@@ -34,47 +34,6 @@ export interface Technician {
   specialty?: string;
   createdAt: string;
 }
-
-// Tipo para Equipamentos
-export interface ServiceOrder {
-  id: string;
-  osNumber: string;
-  clientId: string;
-  clientName: string;
-  technicianId: string;
-  technicianName: string;
-  createdByTechnicianId?: string;  // Flag: ID do técnico que criou a O.S (para rastreamento)
-  device: string;
-  brand: string;
-  model: string;
-  serialNumber?: string;           
-  color?: string;                 
-  observations?: string;
-  defect: string;
-  accessories?: string;
-  priority?: "normal" | "urgent" | "low";
-  entryDate?: string;
-  status: "pending" | "in-progress" | "waiting-parts" | "completed" | "cancelled";
-     
-  
-  paymentMethod?: "cash" | "card" | "pix" | "transfer";
-  paymentAmount?: string;
-  completionDate?: string;        // When the repair was completed
-  deliveryDate?: string;           // When delivered to client
-  
-  // Warranty fields
-
-  warrantyStartDate?: string;      // Date when warranty starts (delivery date)
-  warrantyEndDate?: string;        // Warranty end date (3 months after start)
-  warrantyMonths?: number;         // Number of months (default 3)
-  
-  
-  
-  isActive: boolean; // ativo -> isActive
-    createdAt: string; 
-    updatedAt: string;
-}
-
 
 export interface Equipment {
   id: string;
@@ -104,4 +63,5 @@ export interface Part {
 // Tipo de dados enviados para cadastro (sem ID e campos automáticos)
 export type NewEquipment = Omit<Equipment, 'equipmentId' | 'isActive' | 'createdAt' | 'updatedAt'>;
 
-export type PageType = "main" | "history" | "clients" | "equipments";
+
+export type PageType = "main" | "clients" | "parts" | "equipments";

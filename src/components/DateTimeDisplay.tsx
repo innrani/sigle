@@ -1,5 +1,5 @@
 
-import { formatDate, formatTime } from ".../lib/date-utils";
+import { formatDate, formatTime } from "../../lib/date-utils";
 
 interface DateTimeDisplayProps {
   currentTime: Date;

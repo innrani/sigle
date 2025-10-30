@@ -30,9 +30,6 @@ interface RightSidebarProps {
   onNavigateToHistory: () => void;
   onNavigateToClients: () => void;
   onNavigateToParts: () => void;
-  onNavigateToWarranties: () => void;
-  onNavigateToBudgets: () => void;
-  onNavigateToInvoices: () => void;
   onNavigateToEquipments: () => void;
   onManageTechnicians: () => void;
   onChangeTechnician: () => void;
@@ -45,9 +42,6 @@ export function RightSidebar({
   onNavigateToHistory,
   onNavigateToClients,
   onNavigateToParts,
-  onNavigateToWarranties,
-  onNavigateToBudgets,
-  onNavigateToInvoices,
   onNavigateToEquipments,
   onManageTechnicians,
   onChangeTechnician,
@@ -152,79 +146,6 @@ export function RightSidebar({
             }}
           >
             HISTÓRICO
-          </span>
-        </button>
-
-        {/* GARANTIAS button */}
-        <button
-          onClick={onNavigateToWarranties}
-          className="flex items-center justify-center gap-2 py-1.5 px-2 hover:bg-[#7a6345] rounded-lg transition-colors relative"
-        >
-          <ShieldCheck className="w-4 h-4 flex-shrink-0" />
-          <span
-            style={{
-              fontFamily: "Lexend Deca, sans-serif",
-              fontSize: "9px",
-              fontWeight: 300,
-              letterSpacing: "0.4px",
-              textAlign: "center",
-            }}
-          >
-            GARANTIAS
-          </span>
-          {3 > 0 && (
-            <Badge
-              variant="destructive"
-              className="absolute -top-1 -right-1 h-5 w-5 flex items-center justify-center p-0 text-xs rounded-full"
-            >
-              3
-            </Badge>
-          )}
-        </button>
-
-        {/* ORÇAMENTOS button */}
-        <button
-          onClick={onNavigateToBudgets}
-          className="flex items-center justify-center gap-2 py-1.5 px-2 hover:bg-[#7a6345] rounded-lg transition-colors relative"
-        >
-          <FileEdit className="w-4 h-4 flex-shrink-0" />
-          <span
-            style={{
-              fontFamily: "Lexend Deca, sans-serif",
-              fontSize: "9px",
-              fontWeight: 300,
-              letterSpacing: "0.4px",
-              textAlign: "center",
-            }}
-          >
-            ORÇAMENTOS
-          </span>
-          {5 > 0 && (
-            <Badge
-              variant="destructive"
-              className="absolute -top-1 -right-1 h-5 w-5 flex items-center justify-center p-0 text-xs rounded-full"
-            >
-              5
-            </Badge>
-          )}
-        </button>
-
-        {/* NOTAS FISCAIS button */}
-        <button
-          onClick={onNavigateToInvoices}
-          className="flex items-center justify-center gap-2 py-1.5 px-2 hover:bg-[#7a6345] rounded-lg transition-colors relative"
-        >
-          <Receipt className="w-4 h-4 flex-shrink-0" />
-          <span
-            style={{
-              fontFamily: "Lexend Deca, sans-serif",
-              fontSize: "9px",
-              fontWeight: 300,
-              letterSpacing: "0.4px",
-              textAlign: "center",
-            }}
-          >
-            NOTAS FISCAIS
           </span>
         </button>
 
