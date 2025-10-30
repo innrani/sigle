@@ -27,15 +27,18 @@ export type NewClient = Omit<Client, 'id' | 'is_active' | 'created_at' | 'update
     observations: string | null;
 };
 
-<<<<<<< HEAD
+// Technician type
 export interface Technician {
   id: string;
   name: string;
   phone?: string;
   specialty?: string;
-  createdAt: string;
+  created_at?: string;
+  updated_at?: string;
+  is_active?: boolean;
 }
 
+// Equipment type (simple unified model)
 export interface Equipment {
   id: string;
   device: string;
@@ -43,39 +46,22 @@ export interface Equipment {
   model: string;
   serialNumber?: string;
   notes?: string;
-  lastServiceDate?: string;
-  totalServices: number;
+  isActive?: boolean;
+  created_at?: string;
+  updated_at?: string;
 }
 
 export interface Part {
   id: string;
   name: string;
-  osNumber: string;
-  osDescription: string;
   quantity: number;
-  unit: string;
-  status: "arriving" | "to-order";
-  urgent: boolean;
-  price?: string;
-  orderDate?: string;
-  expectedDate?: string;
-=======
-// Tipo para Equipamentos
-export interface Equipment {
-    equipmentId: string; // idEquipamento -> equipmentId (no frontend é string)
-    serialNumber: string; // numeroSerie -> serialNumber
-    deviceType: string; // tipoAparelho -> deviceType
-    brand: string; // marca -> brand
-    model: string; // modelo -> model    
-    accessories: string; // acessorios -> accessories            
-    isActive: boolean; // ativo -> isActive
-    createdAt: string; 
-    updatedAt: string;
->>>>>>> 81ed30ef804a4c2f516ba630d37a2217f0258421
+  unit?: string;
+  price?: number;
+  isActive?: boolean;
 }
 
 // Tipo de dados enviados para cadastro (sem ID e campos automáticos)
-export type NewEquipment = Omit<Equipment, 'equipmentId' | 'isActive' | 'createdAt' | 'updatedAt'>;
+export type NewEquipment = Omit<Equipment, 'id' | 'isActive' | 'created_at' | 'updated_at'>;
 
 
 export type PageType = "main" | "clients" | "parts" | "equipments";

@@ -1,94 +1,206 @@
-// src/services/database.ts
+// Lightweight DatabaseService mock that falls back to IPC when available.
+// It seeds mock data into localStorage for development so the UI works without Electron.
 
-// Importa os tipos do local correto
-import type { Client, NewClient, Equipment, NewEquipment } from "../types/index";
+import type { Client, NewClient, Equipment, NewEquipment, Part as PartType } from "../types";
 
-// Acessa o ipcRenderer via require global 
-const ipcRenderer = window.require && window.require('electron').ipcRenderer;
+const ipcRenderer = (window as any).require && (window as any).require('electron')?.ipcRenderer;
 
-if (!ipcRenderer) {
-    // Se o IPC não estiver disponível, loga um erro
-    console.error("IPC Renderer não disponível. O código de comunicação com o Electron não funcionará.");
+// Helper: localStorage-backed store
+function storageKey(key: string) { return `sigle:${key}`; }
+function readStore<T>(key: string, fallback: T): T {
+    try {
+        const raw = localStorage.getItem(storageKey(key));
+        if (!raw) return fallback;
+        return JSON.parse(raw) as T;
+    } catch (e) {
+        console.error('readStore error', e);
+        return fallback;
+    }
+}
+function writeStore<T>(key: string, value: T) {
+    try { localStorage.setItem(storageKey(key), JSON.stringify(value)); } catch (e) { console.error('writeStore error', e); }
 }
 
-export const DatabaseService = {
-    // Listar todos os clientes
-    listClients: (): Promise<Client[]> => {
-        if (!ipcRenderer) return Promise.resolve([]);
-        return ipcRenderer.invoke('list-clients');
-    },
-
-    // NOVO: Listar todos os clientes (ativos e inativos)
-    listAllClients: (): Promise<Client[]> => {
-        if (!ipcRenderer) return Promise.resolve([]);
-        // Invoca o novo handler que lista TODOS
-        return ipcRenderer.invoke('list-all-clients');
-    },
-
-    // Reativar cliente inativo
-    reactivateClient: (id: string): Promise<{ success: boolean; message: string }> => {
-        if (!ipcRenderer) return Promise.reject("IPC indisponível");
-        return ipcRenderer.invoke('reactivate-client', id);
-    },
-
-    // Adicionar novo cliente
-    addClient: (client: NewClient): Promise<Client> => {
-        if (!ipcRenderer) return Promise.reject("IPC indisponível");
-        return ipcRenderer.invoke('add-client', client);
-    },
-
-    // Atualizar cliente
-    updateClient: (client: Client): Promise<Client> => {
-        if (!ipcRenderer) return Promise.reject("IPC indisponível");
-        return ipcRenderer.invoke('update-client', client);
-    },
-
-    // Deletar cliente 
-    deleteClient: (id: string): Promise<{ type: 'soft' | 'hard', message: string }> => {
-        if (!ipcRenderer) return Promise.reject("IPC indisponível");
-        // Recebe apenas o ID
-        return ipcRenderer.invoke('delete-client', id);
-    },
-    // ...
-
-    // Buscar cliente por ID
-    getClient: (id: string): Promise<Client> => {
-        if (!ipcRenderer) return Promise.reject("IPC indisponível");
-        return ipcRenderer.invoke('get-client', id);
-    },
-
-    // ------------------------------------
-    // Funções para Equipamento
-    // ------------------------------------
-
-    // 1. Adicionar novo equipamento
-    addEquipment: (equipment: NewEquipment): Promise<Equipment> => {
-        if (!ipcRenderer) return Promise.reject("IPC indisponível");
-        return ipcRenderer.invoke('add-equipment', equipment);
-    },
-    
-    // 2. Listar apenas equipamentos ativos
-    listActiveEquipments: (): Promise<Equipment[]> => {
-        if (!ipcRenderer) return Promise.resolve([]);
-        return ipcRenderer.invoke('list-active-equipments');
-    },
-
-    // 3. Listar TODOS os equipamentos (ativos e inativos)
-    listAllEquipments: (): Promise<Equipment[]> => {
-        if (!ipcRenderer) return Promise.resolve([]);
-        return ipcRenderer.invoke('list-all-equipments');
-    },
-
-    // 4. Deletar/Inativar equipamento
-    deleteEquipment: (equipment_id: number): Promise<{ type: 'soft' | 'hard', message: string }> => {
-        if (!ipcRenderer) return Promise.reject("IPC indisponível");
-        // O ID do equipamento é o PK da tabela
-        return ipcRenderer.invoke('delete-equipment', equipment_id);
-    },
-
-    // 5. Reativar equipamento inativo
-    reactivateEquipment: (equipment_id: number): Promise<{ success: boolean; message: string }> => {
-        if (!ipcRenderer) return Promise.reject("IPC indisponível");
-        return ipcRenderer.invoke('reactivate-equipment', equipment_id);
+// Seed data (only if empty)
+function seedIfEmpty() {
+    if (!localStorage.getItem(storageKey('clients'))) {
+        const now = new Date().toISOString();
+        const clients: Client[] = [
+            { id: 'c1', name: 'João Silva', phone: '1199999-0001', email: 'joao@example.com', cpf: null, address: 'Rua A, 123', city: 'São Paulo', state: 'SP', observations: null, is_active: true, created_at: now, updated_at: now },
+            { id: 'c2', name: 'Maria Oliveira', phone: '1199999-0002', email: null, cpf: null, address: null, city: null, state: null, observations: 'Cliente VIP', is_active: true, created_at: now, updated_at: now },
+        ];
+        writeStore('clients', clients);
     }
+
+    if (!localStorage.getItem(storageKey('parts'))) {
+        const parts: PartType[] = [
+            { id: 'p1', name: 'Bateria', quantity: 10, unit: 'un', price: 45.0, isActive: true },
+            { id: 'p2', name: 'Tela 5.5"', quantity: 3, unit: 'un', price: 120.0, isActive: true },
+        ];
+        writeStore('parts', parts);
+    }
+
+    if (!localStorage.getItem(storageKey('equipments'))) {
+        const equipments: Equipment[] = [
+            { id: '1', device: 'Smartphone', brand: 'MarcaX', model: 'X100', serialNumber: 'SN1001', notes: 'Sem bateria', isActive: true, created_at: new Date().toISOString(), updated_at: new Date().toISOString() },
+            { id: '2', device: 'Notebook', brand: 'MarcaY', model: 'Y200', serialNumber: 'SN2002', notes: 'HD com problema', isActive: false, created_at: new Date().toISOString(), updated_at: new Date().toISOString() },
+        ];
+        writeStore('equipments', equipments);
+    }
+
+    if (!localStorage.getItem(storageKey('technicians'))) {
+        const techs = [
+            { id: 't1', name: 'Carlos', phone: '1191111-0001', specialty: 'Eletrônica', created_at: new Date().toISOString(), updated_at: new Date().toISOString(), is_active: true },
+        ];
+        writeStore('technicians', techs);
+    }
+}
+
+seedIfEmpty();
+
+// Mocked DatabaseService
+export const DatabaseService = {
+    // Parts
+    createPart: async (part: any) => {
+        if (ipcRenderer) return ipcRenderer.invoke('create-part', part);
+        const list = readStore<any[]>('parts', []);
+        const id = `p${Date.now()}`;
+        const item = { id, ...part };
+        list.push(item);
+        writeStore('parts', list);
+        return item;
+    },
+    listParts: async () => {
+        if (ipcRenderer) return ipcRenderer.invoke('list-parts');
+        return readStore<any[]>('parts', []);
+    },
+    updatePart: async (part: any) => {
+        if (ipcRenderer) return ipcRenderer.invoke('update-part', part);
+        const list = readStore<any[]>('parts', []);
+        const idx = list.findIndex((p) => p.id === part.id);
+        if (idx !== -1) list[idx] = part;
+        writeStore('parts', list);
+        return part;
+    },
+    deletePart: async (id: string) => {
+        if (ipcRenderer) return ipcRenderer.invoke('delete-part', id);
+        let list = readStore<any[]>('parts', []);
+        list = list.filter((p) => p.id !== id);
+        writeStore('parts', list);
+        return { success: true, message: 'deleted' };
+    },
+
+    // Clients
+    listClients: async () => {
+        if (ipcRenderer) return ipcRenderer.invoke('list-clients');
+        const clients = readStore<Client[]>('clients', []);
+        return clients.filter((c) => c.is_active);
+    },
+    listAllClients: async () => {
+        if (ipcRenderer) return ipcRenderer.invoke('list-all-clients');
+        return readStore<Client[]>('clients', []);
+    },
+    reactivateClient: async (id: string) => {
+        if (ipcRenderer) return ipcRenderer.invoke('reactivate-client', id);
+        const clients = readStore<Client[]>('clients', []);
+        const idx = clients.findIndex((c) => c.id === id);
+        if (idx !== -1) { clients[idx].is_active = true; writeStore('clients', clients); return { success: true, message: 'reactivated' }; }
+        return { success: false, message: 'not found' };
+    },
+    addClient: async (client: NewClient) => {
+        if (ipcRenderer) return ipcRenderer.invoke('add-client', client);
+        const list = readStore<Client[]>('clients', []);
+        const id = `c${Date.now()}`;
+        const now = new Date().toISOString();
+        const newC: Client = { id, ...client, is_active: true, created_at: now, updated_at: now } as any;
+        list.push(newC);
+        writeStore('clients', list);
+        return newC;
+    },
+    updateClient: async (client: Client) => {
+        if (ipcRenderer) return ipcRenderer.invoke('update-client', client);
+        const list = readStore<Client[]>('clients', []);
+        const idx = list.findIndex((c) => c.id === client.id);
+        if (idx !== -1) list[idx] = client;
+        writeStore('clients', list);
+        return client;
+    },
+    deleteClient: async (id: string) => {
+        if (ipcRenderer) return ipcRenderer.invoke('delete-client', id);
+        let list = readStore<Client[]>('clients', []);
+        list = list.map((c) => c.id === id ? { ...c, is_active: false } : c);
+        writeStore('clients', list);
+        return { type: 'soft', message: 'inactivated' };
+    },
+    getClient: async (id: string) => {
+        if (ipcRenderer) return ipcRenderer.invoke('get-client', id);
+        const list = readStore<Client[]>('clients', []);
+        return list.find((c) => c.id === id) as Client;
+    },
+
+    // Equipments
+    addEquipment: async (equipment: NewEquipment) => {
+        if (ipcRenderer) return ipcRenderer.invoke('add-equipment', equipment);
+        const list = readStore<any[]>('equipments', []);
+        const id = `${Date.now()}`;
+        const now = new Date().toISOString();
+        const item = { id, ...equipment, created_at: now, updated_at: now } as any;
+        list.push(item);
+        writeStore('equipments', list);
+        return item;
+    },
+    listActiveEquipments: async () => {
+        if (ipcRenderer) return ipcRenderer.invoke('list-active-equipments');
+        const list = readStore<any[]>('equipments', []);
+        return list.filter((e) => e.isActive);
+    },
+    listAllEquipments: async () => {
+        if (ipcRenderer) return ipcRenderer.invoke('list-all-equipments');
+        return readStore<any[]>('equipments', []);
+    },
+    deleteEquipment: async (equipment_id: number) => {
+        if (ipcRenderer) return ipcRenderer.invoke('delete-equipment', equipment_id);
+        let list = readStore<any[]>('equipments', []);
+        list = list.map((e) => e.id === String(equipment_id) ? { ...e, isActive: false } : e);
+        writeStore('equipments', list);
+        return { type: 'soft', message: 'inactivated' };
+    },
+    reactivateEquipment: async (equipment_id: number) => {
+        if (ipcRenderer) return ipcRenderer.invoke('reactivate-equipment', equipment_id);
+        const list = readStore<any[]>('equipments', []);
+        const idx = list.findIndex((e) => e.id === String(equipment_id));
+        if (idx !== -1) { list[idx].isActive = true; writeStore('equipments', list); return { success: true, message: 'reactivated' }; }
+        return { success: false, message: 'not found' };
+    },
+
+    // Technicians
+    createTechnician: async (technician: any) => {
+        if (ipcRenderer) return ipcRenderer.invoke('create-technician', technician);
+        const list = readStore<any[]>('technicians', []);
+        const id = `t${Date.now()}`;
+        const now = new Date().toISOString();
+        const item = { id, ...technician, created_at: now, updated_at: now, is_active: true } as any;
+        list.push(item);
+        writeStore('technicians', list);
+        return item;
+    },
+    listTechnicians: async () => {
+        if (ipcRenderer) return ipcRenderer.invoke('list-technicians');
+        return readStore<any[]>('technicians', []);
+    },
+    updateTechnician: async (technician: any) => {
+        if (ipcRenderer) return ipcRenderer.invoke('update-technician', technician);
+        const list = readStore<any[]>('technicians', []);
+        const idx = list.findIndex((t) => t.id === technician.id);
+        if (idx !== -1) list[idx] = technician;
+        writeStore('technicians', list);
+        return technician;
+    },
+    deleteTechnician: async (id: string) => {
+        if (ipcRenderer) return ipcRenderer.invoke('delete-technician', id);
+        let list = readStore<any[]>('technicians', []);
+        list = list.filter((t) => t.id !== id);
+        writeStore('technicians', list);
+        return { success: true, message: 'deleted' };
+    },
 };
