@@ -1,5 +1,6 @@
-// Main layout component
+// src/components/MainLayout.tsx
 
+<<<<<<< HEAD
 import { useRef, useState } from "react";
 import { DateTimeDisplay } from "./DateTimeDisplay";
 import { RightSidebar } from "./RightSidebar";
@@ -92,3 +93,42 @@ export function MainLayout({
     </>
   );
 }
+=======
+import { RightSidebar } from "./RightSidebar";
+import type {Client } from "../types/index"; // Garanta que o caminho do tipo esteja correto
+
+interface MainLayoutProps {  
+  clients: Client[];
+  searchQuery: string;
+  onSearchChange: (query: string) => void;  
+  // CORREÇÃO: Renomeado para refletir o App.tsx
+  onOpenAddModal: () => void;  
+  onNavigateToClients: () => void;  
+}
+
+export function MainLayout({        
+  // CORREÇÃO: Usando o novo nome da prop
+  onOpenAddModal,  
+  onNavigateToClients,
+  // Outras props não usadas diretamente no retorno foram omitidas para clareza
+}: MainLayoutProps) { 
+ 
+  return (
+    <>
+      <div className="flex-1 p-4 h-full">
+      </div>
+
+    
+      {/* Right Sidebar */}
+      <div className="w-[200px] flex-shrink-0 h-screen">
+        <RightSidebar           
+          // CORREÇÃO: Passando a prop para o RightSidebar. 
+            // Como vamos corrigir o RightSidebar abaixo, ele deve aceitar onOpenAddModal.
+          onOpenAddModal={onOpenAddModal}          
+          onNavigateToClients={onNavigateToClients}          
+        />
+      </div>
+    </>
+  );
+}
+>>>>>>> 81ed30ef804a4c2f516ba630d37a2217f0258421

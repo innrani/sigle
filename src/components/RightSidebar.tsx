@@ -2,11 +2,14 @@ import {
   Wrench,
   User,
   Settings,
+<<<<<<< HEAD
   Laptop,
+=======
+>>>>>>> 81ed30ef804a4c2f516ba630d37a2217f0258421
 } from "lucide-react";
 import { Badge } from "./ui/badge";
-import type { Technician } from "../types";
 
+<<<<<<< HEAD
 // TODO: Backend - Replace with real notification counts from database
 
 interface RightSidebarProps {
@@ -27,9 +30,19 @@ export function RightSidebar({
   onNavigateToEquipments,
   onManageTechnicians,
   onChangeTechnician,
+=======
+interface RightSidebarProps {  
+  onOpenAddModal: () => void;  
+  onNavigateToClients: () => void;    
+}
+
+export function RightSidebar({  
+  onOpenAddModal,  
+  onNavigateToClients, 
+>>>>>>> 81ed30ef804a4c2f516ba630d37a2217f0258421
 }: RightSidebarProps) {
   return (
-    <div className="bg-[#8b7355] text-white h-full px-3 py-4 flex flex-col rounded-l-[30px]">
+    <div  className="bg-[#8b7355] text-white h-full px-3 py-4 flex flex-col top-0 right-0  absolute rounded-l-[30px]">
       <div className="text-center mb-3">
         <div
           style={{
@@ -58,29 +71,30 @@ export function RightSidebar({
         >
           SYSTEM
         </div>
-        
-        {/* Active Technician Greeting */}
-        {activeTechnician && (
-          <button
-            onClick={onChangeTechnician}
-            className="mt-2 text-white/90 hover:text-white transition-colors cursor-pointer"
-            style={{
-              fontFamily: "Lexend Deca, sans-serif",
-              fontSize: "10px",
-              fontWeight: 300,
-              letterSpacing: "0.5px",
-            }}
-            title="Clique para trocar de técnico"
-          >
-            Olá, <span style={{ fontWeight: 600 }}>@{activeTechnician.name}</span>
-          </button>
-        )}
       </div>
 
+<<<<<<< HEAD
       {/* Service order creation removed */}
+=======
+      <button        
+        className="bg-[#d4c5a0] text-black rounded-full py-2 px-4 mb-1.5 flex items-center justify-center gap-2 hover:bg-[#c4b590] transition-colors"
+      >
+        <span className="text-2xl">+</span>
+        <span
+          style={{
+            fontFamily: "Lexend Deca, sans-serif",
+            fontSize: "14px",
+            fontWeight: 700,
+            letterSpacing: "0.6px",
+          }}
+        >
+          NOVA O.S
+        </span>
+      </button>
+>>>>>>> 81ed30ef804a4c2f516ba630d37a2217f0258421
 
       <button
-        onClick={onAddClient}
+        onClick={onOpenAddModal}
         className="bg-[#d4c5a0] text-black rounded-full py-2 px-4 mb-4 flex items-center justify-center gap-2 hover:bg-[#c4b590] transition-colors"
       >
         <span className="text-2xl">+</span>
@@ -97,10 +111,100 @@ export function RightSidebar({
       </button>
 
       <nav className="flex flex-col gap-1.5 flex-1">
+<<<<<<< HEAD
         {/* navigation entries removed (history, warranties, budgets, invoices) */}
+=======
+        {/* HISTÓRICO button - now functional */}
+        <button          
+          className="flex items-center justify-center gap-2 py-1.5 px-2 hover:bg-[#7a6345] rounded-lg transition-colors relative"
+        >
+          <FileText className="w-4 h-4 flex-shrink-0" />
+          <span
+            style={{
+              fontFamily: "Lexend Deca, sans-serif",
+              fontSize: "9px",
+              fontWeight: 300,
+              letterSpacing: "0.4px",
+              textAlign: "center",
+            }}
+          >
+            HISTÓRICO
+          </span>
+        </button>
+
+        {/* GARANTIAS button */}
+        <button          
+          className="flex items-center justify-center gap-2 py-1.5 px-2 hover:bg-[#7a6345] rounded-lg transition-colors relative"
+        >
+          <ShieldCheck className="w-4 h-4 flex-shrink-0" />
+          <span
+            style={{
+              fontFamily: "Lexend Deca, sans-serif",
+              fontSize: "9px",
+              fontWeight: 300,
+              letterSpacing: "0.4px",
+              textAlign: "center",
+            }}
+          >
+            GARANTIAS
+          </span>
+          {3 > 0 && (
+            <Badge
+              variant="destructive"
+              className="absolute -top-1 -right-1 h-5 w-5 flex items-center justify-center p-0 text-xs rounded-full"
+            >
+              3
+            </Badge>
+          )}
+        </button>
+
+        {/* ORÇAMENTOS button */}
+        <button          
+          className="flex items-center justify-center gap-2 py-1.5 px-2 hover:bg-[#7a6345] rounded-lg transition-colors relative"
+        >
+          <FileEdit className="w-4 h-4 flex-shrink-0" />
+          <span
+            style={{
+              fontFamily: "Lexend Deca, sans-serif",
+              fontSize: "9px",
+              fontWeight: 300,
+              letterSpacing: "0.4px",
+              textAlign: "center",
+            }}
+          >
+            ORÇAMENTOS
+          </span>
+          {5 > 0 && (
+            <Badge
+              variant="destructive"
+              className="absolute -top-1 -right-1 h-5 w-5 flex items-center justify-center p-0 text-xs rounded-full"
+            >
+              5
+            </Badge>
+          )}
+        </button>
+
+        {/* NOTAS FISCAIS button */}
+        <button          
+          className="flex items-center justify-center gap-2 py-1.5 px-2 hover:bg-[#7a6345] rounded-lg transition-colors relative"
+        >
+          <Receipt className="w-4 h-4 flex-shrink-0" />
+          <span
+            style={{
+              fontFamily: "Lexend Deca, sans-serif",
+              fontSize: "9px",
+              fontWeight: 300,
+              letterSpacing: "0.4px",
+              textAlign: "center",
+            }}
+          >
+            NOTAS FISCAIS
+          </span>
+        </button>
+
+>>>>>>> 81ed30ef804a4c2f516ba630d37a2217f0258421
         {/* PEÇAS button - now functional */}
-        <button
-          onClick={onNavigateToParts}
+        <button          
           className="flex items-center justify-center gap-2 py-1.5 px-2 hover:bg-[#7a6345] rounded-lg transition-colors relative"
         >
           <Wrench className="w-4 h-4 flex-shrink-0" />
@@ -125,6 +229,7 @@ export function RightSidebar({
           )}
         </button>
 
+<<<<<<< HEAD
         {/* EQUIPAMENTOS button - Análise estatística */}
         <button
           onClick={onNavigateToEquipments}
@@ -145,6 +250,9 @@ export function RightSidebar({
         </button>
 
         {/* CLIENTE button */}
+=======
+        {/* CLIENTE button - now functional */}
+>>>>>>> 81ed30ef804a4c2f516ba630d37a2217f0258421
         <button
           onClick={onNavigateToClients}
           className="flex items-center justify-center gap-2 py-1.5 px-2 hover:bg-[#7a6345] rounded-lg transition-colors relative"
@@ -164,11 +272,9 @@ export function RightSidebar({
         </button>
       </nav>
 
-      {/* Bottom Section - Technicians Management */}
+      {/* Technicians Management Button - At Bottom */}
       <div className="mt-auto pt-3 border-t border-[#7a6345]">
-        {/* Technicians Management Button */}
-        <button
-          onClick={onManageTechnicians}
+        <button          
           className="w-full flex items-center justify-center gap-2 py-2 px-2 hover:bg-[#7a6345] rounded-lg transition-colors"
           title="Gerenciar Técnicos"
         >

@@ -27,6 +27,7 @@ export type NewClient = Omit<Client, 'id' | 'is_active' | 'created_at' | 'update
     observations: string | null;
 };
 
+<<<<<<< HEAD
 export interface Technician {
   id: string;
   name: string;
@@ -58,6 +59,19 @@ export interface Part {
   price?: string;
   orderDate?: string;
   expectedDate?: string;
+=======
+// Tipo para Equipamentos
+export interface Equipment {
+    equipmentId: string; // idEquipamento -> equipmentId (no frontend é string)
+    serialNumber: string; // numeroSerie -> serialNumber
+    deviceType: string; // tipoAparelho -> deviceType
+    brand: string; // marca -> brand
+    model: string; // modelo -> model    
+    accessories: string; // acessorios -> accessories            
+    isActive: boolean; // ativo -> isActive
+    createdAt: string; 
+    updatedAt: string;
+>>>>>>> 81ed30ef804a4c2f516ba630d37a2217f0258421
 }
 
 // Tipo de dados enviados para cadastro (sem ID e campos automáticos)
