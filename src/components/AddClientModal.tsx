@@ -82,19 +82,19 @@ export function AddClientModal({ open, onOpenChange, onClientAdded }: AddClientM
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-lg">
         <DialogHeader>
-          <DialogTitle>Novo Cliente</DialogTitle>
+          <DialogTitle>Nova Instituição</DialogTitle>
           <DialogDescription>
-            Preencha os dados do cliente para cadastro.
+            Preencha os dados da instituição (escola, colégio, instituto) para cadastro.
           </DialogDescription>
         </DialogHeader>
         <form onSubmit={handleSubmit} className="space-y-4">
           
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Label htmlFor="name">Nome Completo *</Label>
+              <Label htmlFor="name">Nome da Instituição *</Label>
               <Input 
                 id="name" 
-                placeholder="Ex: João Silva"
+                placeholder="Ex: Escola Municipal Centro, IFBA Campus Salvador"
                 value={formData.name}
                 onChange={handleChange}
                 required
@@ -118,20 +118,19 @@ export function AddClientModal({ open, onOpenChange, onClientAdded }: AddClientM
               <Input 
                 id="email" 
                 type="email"
-                placeholder="exemplo@email.com"
+                placeholder="contato@escola.edu.br"
                 value={formData.email || ""}
                 onChange={handleChange}
                 required
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="cpf">CPF *</Label>
+              <Label htmlFor="cpf">CNPJ (opcional)</Label>
               <Input 
                 id="cpf" 
-                placeholder="000.000.000-00"
+                placeholder="00.000.000/0000-00"
                 value={formData.cpf || ""}
                 onChange={handleChange}
-                required
               />
             </div>
           </div>
@@ -177,7 +176,7 @@ export function AddClientModal({ open, onOpenChange, onClientAdded }: AddClientM
             <textarea
               id="observations"
               rows={3}
-              placeholder="Notas importantes sobre o cliente..."
+              placeholder="Ex: Projetor da sala 12, TV 55 polegadas da biblioteca..."
               className="flex w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
               value={formData.observations || ""}
               onChange={handleChange as (e: React.ChangeEvent<HTMLTextAreaElement>) => void}

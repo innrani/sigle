@@ -1,18 +1,21 @@
 import { useState } from "react";
 import { toast } from "sonner";
 import { DatabaseService } from "../services/database";
+import { PART_TYPES } from "../lib/constants";
 
 // UI Components
 import { Button } from "./ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "./ui/dialog";
 import { Form, FormControl, FormField, FormItem, FormLabel } from "./ui/form";
 import { Input } from "./ui/input";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "./ui/select";
 import { z } from "zod";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 
 // Keep schema as string-based inputs so react-hook-form types match the form controls.
 const partSchema = z.object({
+  type: z.string().min(1, "Tipo é obrigatório"),
   name: z.string().min(1, "Nome é obrigatório"),
   description: z.string().optional(),
   quantity: z.string().regex(/^\d+(?:[.,]\d+)?$/, "Quantidade deve ser um número"),
@@ -33,6 +36,7 @@ export function AddPartModal({ open, onOpenChange, onAddPart }: AddPartModalProp
   const form = useForm<PartFormData>({
     resolver: zodResolver(partSchema),
     defaultValues: {
+      type: "",
       name: "",
       description: "",
       quantity: "0",
@@ -74,12 +78,36 @@ export function AddPartModal({ open, onOpenChange, onAddPart }: AddPartModalProp
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
             <FormField
               control={form.control}
+              name="type"
+              render={({ field }: any) => (
+                <FormItem>
+                  <FormLabel>Tipo de Peça</FormLabel>
+                  <Select onValueChange={field.onChange} defaultValue={field.value}>
+                    <FormControl>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Selecione o tipo de peça" />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      {PART_TYPES.map((type) => (
+                        <SelectItem key={type} value={type}>
+                          {type}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
               name="name"
               render={({ field }: any) => (
                 <FormItem>
                   <FormLabel>Nome</FormLabel>
                   <FormControl>
-                    <Input placeholder="Nome da peça" {...field} />
+                    <Input placeholder="Ex: Lâmpada de Projetor, Cabo HDMI, Placa T-CON" {...field} />
                   </FormControl>
                 </FormItem>
               )}
@@ -92,7 +120,7 @@ export function AddPartModal({ open, onOpenChange, onAddPart }: AddPartModalProp
                 <FormItem>
                   <FormLabel>Descrição</FormLabel>
                   <FormControl>
-                    <Input placeholder="Descrição da peça" {...field} />
+                    <Input placeholder="Ex: Compatível com Epson PowerLite, 3 metros" {...field} />
                   </FormControl>
                 </FormItem>
               )}

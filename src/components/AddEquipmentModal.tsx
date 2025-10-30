@@ -68,7 +68,7 @@ export function AddEquipmentModal({ open, onClose, onSuccess }: AddEquipmentModa
                 <FormItem>
                   <FormLabel>Dispositivo</FormLabel>
                   <FormControl>
-                    <Input placeholder="Ex: Notebook, Desktop, Impressora" {...field} />
+                    <Input placeholder="Ex: Projetor, TV LED, TV LCD" {...field} />
                   </FormControl>
                 </FormItem>
               )}
@@ -81,7 +81,7 @@ export function AddEquipmentModal({ open, onClose, onSuccess }: AddEquipmentModa
                 <FormItem>
                   <FormLabel>Marca</FormLabel>
                   <FormControl>
-                    <Input placeholder="Ex: Dell, HP, Lenovo" {...field} />
+                    <Input placeholder="Ex: Epson, Samsung, LG, Sony, BenQ" {...field} />
                   </FormControl>
                 </FormItem>
               )}
@@ -94,7 +94,7 @@ export function AddEquipmentModal({ open, onClose, onSuccess }: AddEquipmentModa
                 <FormItem>
                   <FormLabel>Modelo</FormLabel>
                   <FormControl>
-                    <Input placeholder="Ex: Inspiron 15, ThinkPad X1" {...field} />
+                    <Input placeholder="Ex: PowerLite X49, UN55TU8000, 43UN7300" {...field} />
                   </FormControl>
                 </FormItem>
               )}

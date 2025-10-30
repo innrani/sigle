@@ -24,8 +24,9 @@ export function PartsPage({ onBack, parts, onAddPart, onEditPart, onDeletePart }
       <Table>
         <TableHeader>
           <TableRow>
+            <TableHead>Tipo</TableHead>
             <TableHead>Nome</TableHead>
-            <TableHead>Descrição</TableHead>
+            <TableHead>Unidade</TableHead>
             <TableHead>Quantidade</TableHead>
             <TableHead>Preço</TableHead>
             <TableHead>Ações</TableHead>
@@ -34,10 +35,11 @@ export function PartsPage({ onBack, parts, onAddPart, onEditPart, onDeletePart }
         <TableBody>
           {parts.map((p) => (
             <TableRow key={p.id}>
+              <TableCell>{p.type ?? "-"}</TableCell>
               <TableCell>{p.name}</TableCell>
               <TableCell>{p.unit ?? "-"}</TableCell>
               <TableCell>{p.quantity}</TableCell>
-              <TableCell>{p.price ?? "-"}</TableCell>
+              <TableCell>R$ {p.price?.toFixed(2) ?? "-"}</TableCell>
               <TableCell>
                 <div className="flex space-x-2">
                   <Button variant="outline" onClick={() => onEditPart(p)}>Editar</Button>

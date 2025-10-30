@@ -26,31 +26,43 @@ function seedIfEmpty() {
     if (!localStorage.getItem(storageKey('clients'))) {
         const now = new Date().toISOString();
         const clients: Client[] = [
-            { id: 'c1', name: 'João Silva', phone: '1199999-0001', email: 'joao@example.com', cpf: null, address: 'Rua A, 123', city: 'São Paulo', state: 'SP', observations: null, is_active: true, created_at: now, updated_at: now },
-            { id: 'c2', name: 'Maria Oliveira', phone: '1199999-0002', email: null, cpf: null, address: null, city: null, state: null, observations: 'Cliente VIP', is_active: true, created_at: now, updated_at: now },
+            { id: 'c1', name: 'Escola Municipal Centro', phone: '7199999-0001', email: 'escola.centro@edu.ba.gov.br', cpf: null, address: 'Av. Central, 500', city: 'Salvador', state: 'BA', observations: 'Projetor da sala 12', is_active: true, created_at: now, updated_at: now },
+            { id: 'c2', name: 'Colégio Estadual Norte', phone: '7199999-0002', email: 'colegio.norte@edu.ba.gov.br', cpf: null, address: 'Rua das Flores, 234', city: 'Feira de Santana', state: 'BA', observations: 'TV 55" da biblioteca', is_active: true, created_at: now, updated_at: now },
+            { id: 'c3', name: 'Instituto Federal BA - Campus Salvador', phone: '7199999-0003', email: 'ifba.salvador@ifba.edu.br', cpf: null, address: 'Av. Araújo Pinho, 39', city: 'Salvador', state: 'BA', observations: 'Múltiplos projetores', is_active: true, created_at: now, updated_at: now },
         ];
         writeStore('clients', clients);
     }
 
     if (!localStorage.getItem(storageKey('parts'))) {
         const parts: PartType[] = [
-            { id: 'p1', name: 'Bateria', quantity: 10, unit: 'un', price: 45.0, isActive: true },
-            { id: 'p2', name: 'Tela 5.5"', quantity: 3, unit: 'un', price: 120.0, isActive: true },
+            { id: 'p1', type: 'Lâmpada', name: 'Lâmpada de Projetor Epson', quantity: 15, unit: 'un', price: 450.0, isActive: true },
+            { id: 'p2', type: 'Lâmpada', name: 'Lâmpada de Projetor Sony', quantity: 8, unit: 'un', price: 520.0, isActive: true },
+            { id: 'p3', type: 'Cabo Flat', name: 'Cabo HDMI 2.0 - 3m', quantity: 25, unit: 'un', price: 35.0, isActive: true },
+            { id: 'p4', type: 'Cabo Flat', name: 'Cabo VGA 5m', quantity: 12, unit: 'un', price: 25.0, isActive: true },
+            { id: 'p5', type: 'Controle Remoto', name: 'Controle Remoto Universal TV', quantity: 10, unit: 'un', price: 45.0, isActive: true },
+            { id: 'p6', type: 'Placa T-CON', name: 'Placa T-CON TV LG 55"', quantity: 3, unit: 'un', price: 280.0, isActive: true },
+            { id: 'p7', type: 'Fonte', name: 'Fonte TV Samsung 32"', quantity: 5, unit: 'un', price: 180.0, isActive: true },
+            { id: 'p8', type: 'Cooler/Ventilador', name: 'Ventilador Projetor BenQ', quantity: 4, unit: 'un', price: 95.0, isActive: true },
         ];
         writeStore('parts', parts);
     }
 
     if (!localStorage.getItem(storageKey('equipments'))) {
         const equipments: Equipment[] = [
-            { id: '1', device: 'Smartphone', brand: 'MarcaX', model: 'X100', serialNumber: 'SN1001', notes: 'Sem bateria', isActive: true, created_at: new Date().toISOString(), updated_at: new Date().toISOString() },
-            { id: '2', device: 'Notebook', brand: 'MarcaY', model: 'Y200', serialNumber: 'SN2002', notes: 'HD com problema', isActive: false, created_at: new Date().toISOString(), updated_at: new Date().toISOString() },
+            { id: '1', device: 'Projetor', brand: 'Epson', model: 'PowerLite X49', serialNumber: 'EP20230001', notes: 'Lâmpada queimada', isActive: true, created_at: new Date().toISOString(), updated_at: new Date().toISOString() },
+            { id: '2', device: 'TV LED', brand: 'Samsung', model: 'UN55TU8000', serialNumber: 'SM20230045', notes: 'Tela com manchas', isActive: true, created_at: new Date().toISOString(), updated_at: new Date().toISOString() },
+            { id: '3', device: 'Projetor', brand: 'BenQ', model: 'MH535FHD', serialNumber: 'BQ20230012', notes: 'Ventilador com ruído', isActive: true, created_at: new Date().toISOString(), updated_at: new Date().toISOString() },
+            { id: '4', device: 'TV LED', brand: 'LG', model: '43UN7300PSC', serialNumber: 'LG20230089', notes: 'Sem imagem, com som', isActive: false, created_at: new Date().toISOString(), updated_at: new Date().toISOString() },
+            { id: '5', device: 'Projetor', brand: 'Sony', model: 'VPL-DX221', serialNumber: 'SN20230033', notes: 'Não liga', isActive: true, created_at: new Date().toISOString(), updated_at: new Date().toISOString() },
         ];
         writeStore('equipments', equipments);
     }
 
     if (!localStorage.getItem(storageKey('technicians'))) {
         const techs = [
-            { id: 't1', name: 'Carlos', phone: '1191111-0001', specialty: 'Eletrônica', created_at: new Date().toISOString(), updated_at: new Date().toISOString(), is_active: true },
+            { id: 't1', name: 'Roberto Silva', phone: '7191234-5001', specialty: 'Projetores e TVs', created_at: new Date().toISOString(), updated_at: new Date().toISOString(), is_active: true },
+            { id: 't2', name: 'Ana Costa', phone: '7191234-5002', specialty: 'Eletrônica de Áudio/Vídeo', created_at: new Date().toISOString(), updated_at: new Date().toISOString(), is_active: true },
+            { id: 't3', name: 'Pedro Martins', phone: '7191234-5003', specialty: 'Manutenção de Projetores', created_at: new Date().toISOString(), updated_at: new Date().toISOString(), is_active: true },
         ];
         writeStore('technicians', techs);
     }

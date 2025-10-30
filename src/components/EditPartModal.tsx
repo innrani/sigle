@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { toast } from "sonner";
 import { DatabaseService } from "../services/database";
+import { PART_TYPES } from "../lib/constants";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
@@ -10,8 +11,10 @@ import { Button } from "./ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "./ui/dialog";
 import { Form, FormControl, FormField, FormItem, FormLabel } from "./ui/form";
 import { Input } from "./ui/input";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "./ui/select";
 
 interface FormValues {
+  type: string;
   name: string;
   description?: string;
   quantity: string;
@@ -20,6 +23,7 @@ interface FormValues {
 
 interface Part {
   id: string;
+  type?: string;
   name: string;
   description?: string;
   quantity: number;
@@ -27,6 +31,7 @@ interface Part {
 }
 
 const partSchema = z.object({
+  type: z.string().min(1, "Tipo é obrigatório"),
   name: z.string().min(1, "Nome é obrigatório"),
   description: z.string().optional(),
   quantity: z.string(),
@@ -54,6 +59,7 @@ export function EditPartModal({ open, onOpenChange, part, onEditPart }: EditPart
   const form = useForm<FormValues>({
     resolver: zodResolver(partSchema),
     defaultValues: {
+      type: part?.type ?? "",
       name: part?.name ?? "",
       description: part?.description ?? "",
       quantity: part?.quantity.toString() ?? "0",
@@ -98,8 +104,32 @@ export function EditPartModal({ open, onOpenChange, part, onEditPart }: EditPart
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
             <FormField
               control={form.control}
+              name="type"
+              render={({ field }: any) => (
+                <FormItem>
+                  <FormLabel>Tipo de Peça</FormLabel>
+                  <Select onValueChange={field.onChange} value={field.value}>
+                    <FormControl>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Selecione o tipo de peça" />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      {PART_TYPES.map((type) => (
+                        <SelectItem key={type} value={type}>
+                          {type}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
               name="name"
-              render={({ field }) => (
+              render={({ field }: any) => (
                 <FormItem>
                   <FormLabel>Nome</FormLabel>
                   <FormControl>
@@ -112,7 +142,7 @@ export function EditPartModal({ open, onOpenChange, part, onEditPart }: EditPart
             <FormField
               control={form.control}
               name="description"
-              render={({ field }) => (
+              render={({ field }: any) => (
                 <FormItem>
                   <FormLabel>Descrição</FormLabel>
                   <FormControl>
@@ -125,7 +155,7 @@ export function EditPartModal({ open, onOpenChange, part, onEditPart }: EditPart
             <FormField
               control={form.control}
               name="quantity"
-              render={({ field }) => (
+              render={({ field }: any) => (
                 <FormItem>
                   <FormLabel>Quantidade</FormLabel>
                   <FormControl>
@@ -143,7 +173,7 @@ export function EditPartModal({ open, onOpenChange, part, onEditPart }: EditPart
             <FormField
               control={form.control}
               name="price"
-              render={({ field }) => (
+              render={({ field }: any) => (
                 <FormItem>
                   <FormLabel>Preço</FormLabel>
                   <FormControl>

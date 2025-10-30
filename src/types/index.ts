@@ -53,6 +53,7 @@ export interface Equipment {
 
 export interface Part {
   id: string;
+  type?: string;
   name: string;
   quantity: number;
   unit?: string;
