@@ -61,7 +61,7 @@ export function RightSidebar({
             letterSpacing: "0.6px",
           }}
         >
-          NOVO CLIENTE
+          NOVO CLIENTE/INSTITUIÇÃO
         </span>
       </button>
 

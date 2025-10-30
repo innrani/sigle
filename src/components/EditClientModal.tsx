@@ -105,19 +105,19 @@ export function EditClientModal({ open, onOpenChange, client, onClientUpdated }:
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-lg">
         <DialogHeader>
-          <DialogTitle>Editar Cliente</DialogTitle>
+          <DialogTitle>Editar Cliente/Instituição</DialogTitle>
           <DialogDescription>
-            Atualize as informações do cliente (ID: {formData.id})
+            Atualize as informações do cliente ou instituição (ID: {formData.id})
           </DialogDescription>
         </DialogHeader>
         <form onSubmit={handleSubmit} className="space-y-4">
           
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Label htmlFor="edit-name">Nome Completo *</Label>
+              <Label htmlFor="edit-name">Nome do Cliente ou Instituição *</Label>
               <Input 
                 id="name" 
-                placeholder="Ex: João Silva"
+                placeholder="Ex: João Silva ou IFBA Campus Salvador"
                 value={formData.name}
                 onChange={handleChange}
                 required
@@ -139,11 +139,11 @@ export function EditClientModal({ open, onOpenChange, client, onClientUpdated }:
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
               <Label htmlFor="edit-email">Email *</Label>
-              <Input id="email" type="email" placeholder="exemplo@email.com" value={formData.email || ""} onChange={handleChange} required/>
+              <Input id="email" type="email" placeholder="contato@escola.edu.br" value={formData.email || ""} onChange={handleChange} required/>
             </div>
             <div className="space-y-2">
-              <Label htmlFor="edit-cpf">CPF *</Label>
-              <Input id="cpf" placeholder="000.000.000-00" value={formData.cpf || ""} onChange={handleChange} />
+              <Label htmlFor="edit-cpf">CPF ou CNPJ</Label>
+              <Input id="cpf" placeholder="000.000.000-00 ou 00.000.000/0000-00" value={formData.cpf || ""} onChange={handleChange} />
             </div>
           </div>
           
